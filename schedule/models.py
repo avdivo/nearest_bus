@@ -4,8 +4,8 @@ BusStop - автобусные остановки
     1. name - название
     2. external_id - внешний id остановки, на сайте Миноблавтотранс https://gpmopt.by/mopt/Home/Index/sluck#/routes/bus
     3. finish - конечная остановка - True, или нет - False
-    4. con_a - связь многие-ко-многим от этой остановки к конечным (по направлению движения)
-    5. con_b - связь многие-ко-многим к этой остановки от конечных (по направлению движения)
+    4. con_to - связь многие-ко-многим от этой остановки к конечным (по направлению движения)
+    5. con_from - связь многие-ко-многим к этой остановки от конечных (по направлению движения)
 
 Bus - автобусы (номера)
     1. number - цифро-буквенное обозначение
@@ -40,9 +40,9 @@ class BusStop(models.Model):
     """Автобусные остановки"""
     name = models.CharField(verbose_name='Название', max_length=100)
     external_id = models.CharField(verbose_name='id Миноблавтотранс', max_length=10, unique=True)  # Поле article WB
-    finish = models.BooleanField(verbose_name='Это конечная остановка')
-    con_a = models.ManyToManyField('self', verbose_name='С этой остановки на какие конечные')
-    con_b = models.ManyToManyField('self', verbose_name='На эту остановку с каких конечных')
+    finish = models.BooleanField(verbose_name='Это конечная остановка', default=False)
+    con_to = models.ManyToManyField('self', verbose_name='С этой остановки на какие конечные', null=True)
+    con_from = models.ManyToManyField('self', verbose_name='На эту остановку с каких конечных')
 
     def __str__(self):
         word = 'Остановка'
@@ -59,7 +59,7 @@ class Bus(models.Model):
     """Автобусы"""
     number = models.CharField(verbose_name='Номер', max_length=10)
     station = models.ManyToManyField(BusStop, verbose_name='Конечные остановки автобуса',
-                                     related_name='buses', blank=False)
+                                     related_name='buses')
     active = models.BooleanField(verbose_name='Автобус ходит', default=True)
 
     def __str__(self):
@@ -80,7 +80,7 @@ class Router(models.Model):
                             on_delete=models.CASCADE, null=False, blank=False)
 
     def __str__(self):
-        return f'Автобус {self.bus} {self.start.name} - {self.end.name}'
+        return f'{self.bus} {self.start.name} - {self.end.name}'
 
     class Meta:
         verbose_name = 'Маршрут'
@@ -90,7 +90,7 @@ class Router(models.Model):
 class Order(models.Model):
     """Порядок остановок на маршруте."""
     order_number = models.IntegerField(verbose_name='Номер по-порядку')
-    router = models.ForeignKey(BusStop, verbose_name='Маршрут', related_name='orders_for_router',
+    router = models.ForeignKey(Router, verbose_name='Маршрут', related_name='orders_for_router',
                                on_delete=models.CASCADE, null=False, blank=False)
     bus_stop = models.ForeignKey(BusStop, verbose_name='Остановка',
                                  on_delete=models.CASCADE, null=False, blank=False)
@@ -101,7 +101,7 @@ class Order(models.Model):
         Если это первая запись в маршруте - она получает значение 1."""
         if not self.order_number:
             max_order_number = Order.objects.filter(
-                router=self.router, bus_stop=self.bus_stop).order_by('-order_number').first()
+                router=self.router).order_by('-order_number').first()
             if max_order_number:
                 self.order_number = max_order_number.order_number + 1
             else:
@@ -125,14 +125,6 @@ class Schedule(models.Model):
     bus = models.ForeignKey(Bus, verbose_name='Автобус', related_name='time_for_bus',
                             on_delete=models.CASCADE, null=False, blank=False)
     time = models.TimeField(verbose_name='Время')
-
-    def get_day_string(self, day_as_int: int):
-        """Возвращает сокращенное название дня недели в зависимости от номера.
-        Принимает номер дня в неделе."""
-        if day_as_int < 1 or day_as_int > 7:
-            raise 'Не правильный номер дня недели.'
-        days = ['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс']
-        return days[day_as_int-1]
 
     def __str__(self):
         return str(f"{self.get_day_string(self.day)} {self.time.strftime('%H:%M')} "
