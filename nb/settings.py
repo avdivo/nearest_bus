@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-!s9jxzj)ssq^v)8bq3kth@cj*eqy(^$_r)kdj*5l$rd5f7%j=%
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'schedule',
+    'tbot',
 ]
 
 MIDDLEWARE = [
