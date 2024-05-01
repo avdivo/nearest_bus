@@ -24,63 +24,74 @@ def menu(bot, message):
 
     # Определение пользовательских клавиатур
     kb = dict()
-    kb['Дополнительно'] = None
-    kb['Главное меню'] = None
 
     # Настройки
-    kb['Настройки'] = [
-        {'Добавить остановку': Executor, 'Редактировать маршрут': Executor},
-        {'Назад': 'Дополнительно'}
-    ]
+    settings_menu = {
+        'Настройки': [
+            {'Добавить остановку': Executor, 'Редактировать маршрут': Executor},
+            {'Назад': 'Дополнительно'}
+        ]
+    }
 
     # Полное расписание
-    kb['Полное расписание'] = [
-        {'С остановки': Executor, 'По маршруту': Executor},
-        {'Назад': 'Дополнительно'}
-    ]
+    full_shedule_menu = {
+        'Полное расписание': [
+            {'С остановки': Executor, 'По маршруту': Executor},
+            {'Назад': 'Дополнительно'}
+        ]
+    }
 
     # Дополнительно
-    kb['Дополнительно'] = [
-        {'Настройки': kb['Настройки'], 'Полное расписание': kb['Полное расписание']},
-        {'Назад': 'Главное меню'}
-    ]
+    add_menu = {
+        'Дополнительно': [
+            {'Настройки': 'Настройки', 'Полное расписание': 'Полное расписание'},
+            {'Назад': 'Главное меню'}
+        ]
+    }
 
     # Главное меню
-    kb['Главное меню'] = [
-        {'Мои маршруты': Executor, 'Дополнительно': kb['Дополнительно']},
-    ]
+    main_menu = {
+        'Главное меню': [
+            {'Мои маршруты': Executor, 'Дополнительно': 'Дополнительно'},
+        ]
+    }
 
+    # Объединить все меню в один словарь
+    kb.update(main_menu)
+    kb.update(add_menu)
+    kb.update(settings_menu)
+    kb.update(full_shedule_menu)
+
+    # Проверка и авторизация пользователя
     user = authorize(message)
     if not user:
+        # Для ботов
         raise PermissionDenied
 
-    menu_items = dict()
-    back_menu = None
+    # Ищем в текущем меню слово из сообщения (нажатую кнопку)
+    point_menu = None
     for item in kb[user.user_menu]:
-        for key in item.keys():
-            menu_items[key] = item[key]
-            if key == 'Назад':
-                back_menu = item[key]
+        if text in item:
+            # Найдена нажатая кнопка меню (клавиатуры)
+            point_menu = item[text]
+            break
 
-    if text in menu_items:
-        # Нажата кнопки входящая в меню
-        if isinstance(kb[text], (list, str)):
-            # Если в этом пункте меню список или строка - то это другое меню.
-            # Проверим на кнопку Назад и обработаем отдельно
-            if text == 'Назад':
-                text = menu_items[back_menu]
+    # Для перехода к другому меню (клавиатуре) в найденном результате будет str
+    # Если там не строка - значит это действие в окне чата или что-то другое.
+    if isinstance(point_menu, str):
+        # Запоминаем новое меню пользователя
+        user.user_menu = point_menu
+        user.save()
 
-            # В списке количество словарей - это количество строк,
-            # а количество ключей в словаре - это количество кнопок в строке.
-            # Отображаем клавиатуру соответствующего вида
-            markup = types.ReplyKeyboardMarkup()
-            for item in kb[text]:
-                markup.row(*(types.KeyboardButton(button) for button in item.keys()))
-            bot.send_message(message.chat.id, 'Выберите:', reply_markup=markup)
+        # В списке количество словарей - это количество строк,
+        # а количество ключей в словаре - это количество кнопок в строке.
+        # Отображаем клавиатуру соответствующего вида
+        markup = types.ReplyKeyboardMarkup()
+        for item in kb[point_menu]:
+            markup.row(*(types.KeyboardButton(button) for button in item.keys()))
+        bot.send_message(message.chat.id, f'{point_menu}', reply_markup=markup)
 
-            # Запоминаем текущее меню пользователя
-            user.user_menu = text
-            user.save()
         return
 
-    bot.send_message(message.chat.id, "Ничего не выбрано.")
+    bot.send_message(message.chat.id, f"{text}")
+
