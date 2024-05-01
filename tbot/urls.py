@@ -1,9 +1,9 @@
-from .views import bot
+from .views import telegram
 from django.urls import path
 
 
 urlpatterns = [
-    path('tbot/', bot, name='tbot'),
+    path('tbot/', telegram, name='tbot'),
 ]
 
 
