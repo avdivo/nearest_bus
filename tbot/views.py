@@ -35,14 +35,11 @@ def telegram(request):
 
 @bot.message_handler(commands=['start'])
 def greet(message):
-    print('--------------------hELLO--------------------')
-    if authorize(message):
-        bot.send_message(message.chat.id, "Hello")
-        try:
-            menu(bot, message)
-        except Exception as e:
-            print(f"An error occurred: {e}")
-            bot.send_message(message.chat.id, "An error occurred, please try again.")
+    try:
+        menu(bot, message, 'Главное меню')
+    except Exception as e:
+        print(f"Произошла ошибка: {e}")
+        bot.send_message(message.chat.id, "Произошла ошибка, попробуйте снова.")
 
 
 # @tbot.callback_query_handler(func=lambda call: True)
@@ -55,11 +52,11 @@ def greet(message):
 
 @bot.message_handler(func=lambda message: True)
 def echo_message(message):
-    menu(bot, message)
-
-
-
-
+    try:
+        menu(bot, message)
+    except Exception as e:
+        print(f"Произошла ошибка: {e}")
+        bot.send_message(message.chat.id, "Произошла ошибка, попробуйте снова.")
 
 # def create_keyboard(user):
 #     keyboard = telebot.types.InlineKeyboardMarkup()

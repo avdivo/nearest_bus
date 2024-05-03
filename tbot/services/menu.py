@@ -13,14 +13,13 @@ from tbot.models import BotUser
 
 from telebot import types
 
-from tbot.services.executors import Executor
+from tbot.services.executors import Executor, ExeAddBusStop
 from tbot.services.functions import authorize
 
 
-def menu(bot, message):
+def menu(bot, message, open_menu=None):
     """Принимает объект бота и сообщение пользователя полученное из телеграмм.
-    """
-    text = message.text
+    Третий аргумент, если есть - это меню, которое нужно отобразить."""
 
     # Определение пользовательских клавиатур
     kb = dict()
@@ -28,7 +27,7 @@ def menu(bot, message):
     # Настройки
     settings_menu = {
         'Настройки': [
-            {'Добавить остановку': Executor, 'Редактировать маршрут': Executor},
+            {'Добавить остановку': ExeAddBusStop, 'Редактировать маршрут': Executor},
             {'Назад': 'Дополнительно'}
         ]
     }
@@ -68,13 +67,18 @@ def menu(bot, message):
         # Для ботов
         raise PermissionDenied
 
-    # Ищем в текущем меню слово из сообщения (нажатую кнопку)
-    point_menu = None
-    for item in kb[user.user_menu]:
-        if text in item:
-            # Найдена нажатая кнопка меню (клавиатуры)
-            point_menu = item[text]
-            break
+    if not open_menu:
+        # Если второй параметр - объект, то это сообщение пользователя
+        # Ищем в текущем меню слово из сообщения (нажатую кнопку)
+        point_menu = None
+        for item in kb[user.user_menu]:
+            if message.text in item:
+                # Найдена нажатая кнопка меню (клавиатуры)
+                point_menu = item[message.text]
+                break
+    else:
+        # Если второй параметр - строка, то это просто меню которое нужно отобразить
+        point_menu = open_menu
 
     # Для перехода к другому меню (клавиатуре) в найденном результате будет str
     # Если там не строка - значит это действие в окне чата или что-то другое.
@@ -93,5 +97,10 @@ def menu(bot, message):
 
         return
 
-    bot.send_message(message.chat.id, f"{text}")
+    # Если в point_menu класс ExeAddBusStop, то это действие в окне чата
+    if point_menu == ExeAddBusStop:
+        point_menu(bot, user, None)
+        return
+
+    bot.send_message(message.chat.id, f"{message.text}")
 
