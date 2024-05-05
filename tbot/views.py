@@ -12,7 +12,7 @@ from .services.functions import authorize
 from .services.executors import ExeAddBusStop, MyRouter
 
 
-TOKEN = '7019444368:AAFUiHbtAvmERwxUoP_GemKTlPas2rm_DSM'
+TOKEN = ''
 bot = telebot.TeleBot(TOKEN, threaded=False)
 #
 #
