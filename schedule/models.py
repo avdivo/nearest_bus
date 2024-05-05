@@ -33,6 +33,9 @@ Schedule - расписание
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 
+from utils.translation import get_day_string
+
+
 # logger = logging.getLogger('django')
 
 
@@ -43,6 +46,64 @@ class BusStop(models.Model):
     finish = models.BooleanField(verbose_name='Это конечная остановка', default=False)
     con_to = models.ManyToManyField('self', verbose_name='С этой остановки на какие конечные', null=True)
     con_from = models.ManyToManyField('self', verbose_name='На эту остановку с каких конечных')
+
+    def get_related_stops(self):
+        """Возвращает список остановок, связанных с данной остановкой одним маршрутом.
+        Принимает объект остановки.
+        Находит все маршруты, в которых есть переданная остановка через Order.
+        Возвращает все остановки на этих маршрутах."""
+        # Найдем все записи, связанные с остановкой
+        related_orders = Order.objects.filter(bus_stop=self)
+        # Найдем все маршруты, связанные c этими записями
+        related_routers = [order.router for order in related_orders]
+        # Найдем все остановки на этих маршрутах
+        related_stops = set()
+        for router in related_routers:
+            stops = Order.objects.filter(router=router).order_by('order_number')
+            for stop in stops:
+                related_stops.add(stop.bus_stop)
+
+        return related_stops
+
+    @staticmethod
+    def get_routers_by_two_busstop(one: str, two: str):
+        """Возвращает информацию по маршрутам проходящим через 2 остановки в указанном порядке.
+        Принимает 2 названия остановок.
+        Возвращает словарь: {'start': объект остановки, 'finish': объект остановки,
+        'buses': список автобусов от 1 ко 2}."""
+        # Получаем все объекты Order, связанные с каждой из остановок
+        orders_one = Order.objects.filter(bus_stop__name=one)
+        orders_two = Order.objects.filter(bus_stop__name=two)
+
+        # Получаем маршруты, связанные с каждым из наборов объектов Order
+        routers_one = {order.router for order in orders_one}
+        routers_two = {order.router for order in orders_two}
+
+        # Находим пересечение маршрутов
+        common_routers = routers_one.intersection(routers_two)
+
+        # Перебираем маршруты и находим тот, в котором у первой остановки номер по порядку
+        # в Order меньше чем у второй остановки. Получаем ее id. Возвращаем объект остановки.
+        #
+        start, stop = None, None
+        buses = []  # Список автобусов на маршруте между заданными остановками
+        for router in common_routers:
+            order_one = Order.objects.get(router=router, bus_stop__name=one)
+            order_two = Order.objects.get(router=router, bus_stop__name=two)
+            if order_one.order_number < order_two.order_number:
+                buses.append(router.bus)  # Маршрут идет в нужном направлении, запоминаем его автобус
+                start = order_one.bus_stop  # Возвращаем объект остановки
+                stop = order_two.bus_stop
+
+        return {'start': start, 'finish': stop, 'buses': buses}
+
+    def get_bus_by_stop(self):
+        """Возвращает список автобусов, проходящих через остановку.
+        Принимает объект остановки.
+        """
+        orders = Order.objects.filter(bus_stop=self)
+        buses = {order.router.bus for order in orders}
+        return buses
 
     def __str__(self):
         word = 'Остановка'
@@ -78,6 +139,10 @@ class Router(models.Model):
                             on_delete=models.PROTECT, null=False, blank=False)
     bus = models.ForeignKey(Bus, verbose_name='Автобус', related_name='routers',
                             on_delete=models.CASCADE, null=False, blank=False)
+
+    def get_stops_by_route(self, route):
+        """Возвращает список остановок на маршруте"""
+        return Order.objects.filter(router=route).order_by('order_number')
 
     def __str__(self):
         return f'{self.bus} {self.start.name} - {self.end.name}'
@@ -127,7 +192,7 @@ class Schedule(models.Model):
     time = models.TimeField(verbose_name='Время')
 
     def __str__(self):
-        return str(f"{self.get_day_string(self.day)} {self.time.strftime('%H:%M')} "
+        return str(f"{get_day_string(self.day)} {self.time.strftime('%H:%M')} "
                    f"автобус {self.bus.number} на остановке {self.bus_stop.name}")
 
     class Meta:

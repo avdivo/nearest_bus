@@ -5,18 +5,18 @@ import telebot
 from tbot.models import BotUser
 
 
-def authorize(message) -> BotUser:
+def authorize(from_user) -> BotUser:
     """Автоматическая регистрация и авторизация пользователя.
     Получает сообщение пользователя. Проверяет по id ТГ есть ли он в БД.
     Если нет - добавляет.
     Возвращает объект модели пользователей."""
-    if not message.from_user.is_bot:
-        user_id = message.from_user.id
+    if not from_user.is_bot:
+        user_id = from_user.id
         user = BotUser.objects.filter(user_id=user_id).first()
         if not user:
             # Добавляем пользователя в БД
-            first_name = message.from_user.first_name
-            username = message.from_user.username
+            first_name = from_user.first_name
+            username = from_user.username
             user = BotUser.objects.create(user_id=user_id, user_name=first_name, user_login=username)
             user.save()
         return user

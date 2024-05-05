@@ -9,6 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from .services.menu import menu
 from .services.functions import authorize
+from .services.executors import ExeAddBusStop, MyRouter
 
 
 TOKEN = '7019444368:AAFUiHbtAvmERwxUoP_GemKTlPas2rm_DSM'
@@ -42,13 +43,28 @@ def greet(message):
         bot.send_message(message.chat.id, "Произошла ошибка, попробуйте снова.")
 
 
-# @tbot.callback_query_handler(func=lambda call: True)
-# def callback_inline(call):
-#     if call.message:
-#         if call.data == '1':
-#             tbot.send_message(call.message.chat.id, 'You clicked Button 1')
-#         elif call.data == '2':
-#             tbot.send_message(call.message.chat.id, 'You clicked Button 2')
+@bot.callback_query_handler(func=lambda call: True)
+def callback_inline(call):
+    if call.message:
+        try:
+            user = authorize(call.from_user)
+            if not user:
+                # Для ботов
+                raise PermissionDenied
+            class_name = user.parameter.class_name
+            if class_name:
+                # В переменной class_name хранится название класса программы,
+                # которая выполняется для этого пользователя, создаем объект,
+                # одновременно запустится продолжение выполнения программы.
+                executor = globals()[class_name](bot, user, call)
+            else:
+                # Если нет программы, сообщаем об ошибке, такого быть не должно
+                print(f"Произошла ошибка 1:")
+                bot.send_message(call.message.chat.id, "Запрос не обработан.")
+        except Exception as e:
+            print(f"Произошла ошибка 2: {e}")
+            bot.send_message(call.message.chat.id, "Произошла ошибка, попробуйте снова.")
+
 
 @bot.message_handler(func=lambda message: True)
 def echo_message(message):

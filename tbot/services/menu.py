@@ -13,7 +13,7 @@ from tbot.models import BotUser
 
 from telebot import types
 
-from tbot.services.executors import Executor, ExeAddBusStop
+from tbot.services.executors import Executor, ExeAddBusStop, MyRouter
 from tbot.services.functions import authorize
 
 
@@ -51,7 +51,7 @@ def menu(bot, message, open_menu=None):
     # Главное меню
     main_menu = {
         'Главное меню': [
-            {'Мои маршруты': Executor, 'Дополнительно': 'Дополнительно'},
+            {'Мои маршруты': MyRouter, 'Дополнительно': 'Дополнительно'},
         ]
     }
 
@@ -62,13 +62,12 @@ def menu(bot, message, open_menu=None):
     kb.update(full_shedule_menu)
 
     # Проверка и авторизация пользователя
-    user = authorize(message)
+    user = authorize(message.from_user)
     if not user:
         # Для ботов
         raise PermissionDenied
 
     if not open_menu:
-        # Если второй параметр - объект, то это сообщение пользователя
         # Ищем в текущем меню слово из сообщения (нажатую кнопку)
         point_menu = None
         for item in kb[user.user_menu]:
@@ -77,11 +76,12 @@ def menu(bot, message, open_menu=None):
                 point_menu = item[message.text]
                 break
     else:
-        # Если второй параметр - строка, то это просто меню которое нужно отобразить
+        # Специально введено, чтобы отображать любое меню. Например, при старте
         point_menu = open_menu
 
     # Для перехода к другому меню (клавиатуре) в найденном результате будет str
     # Если там не строка - значит это действие в окне чата или что-то другое.
+    # Если там None - значит кнопка не найдена, возможно просто введен текст.
     if isinstance(point_menu, str):
         # Запоминаем новое меню пользователя
         user.user_menu = point_menu
@@ -97,10 +97,28 @@ def menu(bot, message, open_menu=None):
 
         return
 
-    # Если в point_menu класс ExeAddBusStop, то это действие в окне чата
-    if point_menu == ExeAddBusStop:
-        point_menu(bot, user, None)
+    # Мы пришли сюда если в point_menu пусто или там имя класса новой программы.
+    if point_menu:
+        # Если в point_menu класс, то это начало программы в окне чата
+        point_menu(bot, user, message, action=True)
         return
 
-    bot.send_message(message.chat.id, f"{message.text}")
+    # Если в point_menu пусто, то в message.text текст сообщения от пользователя,
+    # он может быть нужен программе в окне чата, передаем его.
+    # Если в ответ получим None, значит программе он не нужен.
+    if user.parameter.class_name:
+        # В переменной class_name хранится название класса программы,
+        # которая выполняется для этого пользователя, создаем объект,
+        # одновременно запустится продолжение выполнения программы.
+        answer = globals()[user.parameter.class_name](bot, user, message)
+
+        # Тут можно обработать необработанные сообщения, если answer is None.
+
+    else:
+        # Если нет программы, сообщаем об ошибке, такого быть не должно
+        print(f"Произошла ошибка:")
+        bot.send_message(message.chat.id, "Запрос не обработан.")
+
+
+
 

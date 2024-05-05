@@ -13,6 +13,14 @@ class BotUser(models.Model):
     def __str__(self):
         return str(f'{self.user_login}')
 
+    def save(self, *args, **kwargs):
+        # Если это новый объект, то создаем связанный объект Parameter
+        if not self.pk:
+            super(BotUser, self).save(*args, **kwargs)
+            Parameter.objects.create(bot_user=self)
+        else:
+            super(BotUser, self).save(*args, **kwargs)
+
     class Meta:
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
@@ -24,7 +32,7 @@ class Parameter(models.Model):
     class_name = models.CharField(verbose_name='Класс (программа)', max_length=100)
     favorites = models.TextField(verbose_name='Избранное в JSON', default='{}')
     addition = models.TextField(verbose_name='Дополнительные параметры в JSON', default='{}')
-    bot_user = models.OneToOneField(BotUser, on_delete=models.CASCADE, verbose_name='Пользователь')
+    bot_user = models.OneToOneField(BotUser, on_delete=models.CASCADE, verbose_name='Пользователь', default=None)
 
     def get_addition(self, name: str):
         """Возвращает запрошенный аттрибут в виде словаря или None.

@@ -23,7 +23,7 @@
 import os
 import json
 
-from schedule.services.add_to_momels import (add_bus, add_bus_stop, add_final_stop_to_bus_stop,
+from schedule.services.add_to_models import (add_bus, add_bus_stop, add_final_stop_to_bus_stop,
                                              add_router, add_final_stop_to_bus, add_order, add_time_point)
 
 
