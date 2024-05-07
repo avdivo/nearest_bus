@@ -257,19 +257,30 @@ class MyRouterSetting(Executor):
         - Переименовать маршрут
         - Удалить маршрут
     """
+    def make_checking_dict_by_list(self, ful_list: list, check_list: list):
+        """Создает словарь из полного списка элементов (ключи),
+        со значениями True для элементов во втором списке,
+        и False для остальных.
+        Возвращает словарь {элемент: True/False}.
+        """
+        check_dict = dict()
+        for item in ful_list:
+            if item in check_list:
+                check_dict[item] = True
+            else:
+                check_dict[item] = False
+        return check_dict
 
-    def make_bus_list(self):
+    def make_bus_list_by_buss(self, busstop_id: str):
         """Создает словарь автобусов с помеченными (выбранными).
-        Принимает список автобусов.
+        Принимает id остановки
+        Список автобусов берет из Избранного пользователя.
         Возвращает словарь {автобус: True/False}.
         """
-        buses = dict()
-        for bus in Bus.get_buses():
-            check = False
-            if bus in self.other_fields['favorites']['check']:
-                check = True
-            buses[bus] = check
-        return buses
+        bus_stop = BusStop.objects.get(external_id=busstop_id)
+        buses_obj = bus_stop.get_bus_by_stop()
+        buses = [bus.number for bus in buses_obj]
+        return self.make_checking_dict_by_list(buses, self.other_fields['favorites']['check'])
 
     def get_favorite(self, name: str):
         """Возвращает словарь с данными о маршруте из Избранного.
@@ -287,8 +298,20 @@ class MyRouterSetting(Executor):
 
     def execute(self):
         """Показывает короткое расписание автобусов на выбранном маршруте."""
+        menu = {
+            'Выбор автобусов': 2.0,
+            'Вид расписания': 3.0,
+            'Сколько автобусов показывать': 4.0,
+            'Переименовать маршрут': 5.0,
+            'Удалить маршрут': 6.0
+        }
+
+        if self.stage == 10:
+            # ---------------- 10 этап - определение выбора меню ----------------
+            self.stage = menu[self.key_name]
+
         if self.stage == 0:
-            # ---------------- 1 этап - запрос маршрута ----------------
+            # ---------------- 0 этап - запрос маршрута ----------------
             # Выводим список маршрутов из Избранного
             favorites = json.loads(self.user.parameter.favorites)
             self.kb_wait = [self.keyboard('Редактирование маршрута:', favorites.keys(), row=1)]
@@ -296,32 +319,27 @@ class MyRouterSetting(Executor):
             self.stage += 1
 
         elif self.stage == 1:
-            # ---------------- 2 этап - выбор действия ----------------
-            # Получаем данные о маршруте из Избранного
+            # ---------------- 1 этап - выбор действия ----------------
+            # Получаем данные о маршруте из Избранного и сохраняем их в дополнительное поле
             favorites = json.loads(self.user.parameter.favorites)
             self.other_fields['name_rout'] = self.key_name  # Сохраняем название маршрута
             self.other_fields['favorites'] = favorites[self.key_name]  # Сохраняем данные о настройках маршрута
 
-
-            menu = ['Выбор автобусов', 'Способ отображения расписания',
-                    'Сколько автобусов показывать', 'Переименовать маршрут',
-                    'Удалить маршрут']
-
             # Выводим клавиатуру с действиями
-            self.kb_wait = [self.keyboard('Выберите действие:', menu, row=1)]
+            self.kb_wait = [self.keyboard('Выберите действе:', menu.keys(), row=1)]
+
+            self.stage = 10
+
+        elif self.stage == 2.0:
+            # ---------------- 2.0 этап - вывод списка автобусов ----------------
+            # Список автобусов представляется с возможностью выбора (галочка)
+            buses = self.make_bus_list_by_buss(self.other_fields['favorites']['start'])
+            self.kb_wait = [self.keyboard('Выберите автобусы:', buses, row=3)]
 
             self.stage = 2.1
 
         elif self.stage == 2.1:
-            # ---------------- 2.1 этап - вывод списка автобусов ----------------
-            # Список автобусов представляется с возможностью выбора (галочка)
-            TODO: 'Сделать вывод только тех автобусов, которые есть на остановке'
-            self.kb_wait = [self.keyboard('Выберите автобусы:', self.make_bus_list(), row=3)]
-
-            self.stage = 2.2
-
-        elif self.stage == 2.2:
-            # ---------------- 2.2 этап - выбор автобусов в списке  ----------------
+            # ---------------- 2.1 этап - выбор автобусов в списке  ----------------
             # Реакция на клик по автобусу
             if self.key_name in self.other_fields['favorites']['check']:
                 self.other_fields['favorites']['check'].remove(self.key_name)
@@ -330,9 +348,95 @@ class MyRouterSetting(Executor):
                 self.other_fields['favorites']['check'].sort()
 
             # Выводим клавиатуру с заменой предыдущей
-            self.kb_wait = [self.keyboard('Выберите автобусы:', self.make_bus_list(), row=3, replace=True)]
+            buses = self.make_bus_list_by_buss(self.other_fields['favorites']['start'])
+            self.kb_wait = [self.keyboard('Выберите автобусы:', buses, row=3, replace=True)]
 
             # Сохраняем изменения в Избранном
             self.set_favorite(self.other_fields['name_rout'], self.other_fields['favorites'])
 
+        elif self.stage == 3.0:
+            # ---------------- 3 этап - выбор вида расписания ----------------
+            if 'view' in self.other_fields['favorites']:
+                # Если вид расписания уже был выбран, то выводим его
+                check = self.other_fields['favorites']['view']
+            else:
+                check = 'По времени'
 
+            menu = self.make_checking_dict_by_list(['По времени', 'По автобусам'], [check])
+            self.kb_wait = [self.keyboard('Выберите вид расписания:', menu, row=1)]
+
+            self.stage = 3.1
+
+        elif self.stage == 3.1:
+            # ---------------- 3.1 этап - записать вид расписания ----------------
+            # Реакция на клик по виду расписания
+            menu = self.make_checking_dict_by_list(['По времени', 'По автобусам'], [self.key_name])
+            self.kb_wait = [self.keyboard('Выберите вид расписания:', menu, row=1, replace=True)]
+
+            # Сохраняем изменения в Избранном
+            self.other_fields['favorites']['view'] = self.key_name
+            self.set_favorite(self.other_fields['name_rout'], self.other_fields['favorites'])
+
+        elif self.stage == 4.0:
+            # ---------------- 4 этап - выбор количества автобусов ----------------
+            if 'count' in self.other_fields['favorites']:
+                # Если количество автобусов уже было выбрано, то выводим его
+                check = self.other_fields['favorites']['count']
+            else:
+                check = '2'
+
+            menu = self.make_checking_dict_by_list(['2', '3', '4', '5', 'Все'], [check])
+            self.kb_wait = [self.keyboard('Сколько автобусов показывать:', menu, row=2)]
+
+            self.stage = 4.1
+
+        elif self.stage == 4.1:
+            # ---------------- 4.1 этап - записать количество автобусов ----------------
+            # Реакция на клик по количеству автобусов
+            menu = self.make_checking_dict_by_list(['2', '3', '4', '5', 'Все'], [self.key_name])
+            self.kb_wait = [self.keyboard('Сколько автобусов показывать:', menu, row=2, replace=True)]
+
+            # Сохраняем изменения в Избранном
+            self.other_fields['favorites']['count'] = self.key_name
+            self.set_favorite(self.other_fields['name_rout'], self.other_fields['favorites'])
+
+        elif self.stage == 5.0:
+            # ---------------- 5 этап - переименование маршрута ----------------
+            # Отправляем сообщение с запросом нового имени
+            self.bot.send_message(self.message.chat.id, 'Введите новое имя для маршрута:')
+
+            self.stage = 5.1
+
+        elif self.stage == 5.1:
+            # ---------------- 5.1 этап - сохранение нового имени ----------------
+            # Сохраняем новое имя в Избранном с сохранением порядка
+            favorites = json.loads(self.user.parameter.favorites)
+            new_favorites = dict()
+            for key, value in favorites.items():
+                if key == self.other_fields['name_rout']:
+                    new_favorites[self.message.text] = value
+                else:
+                    new_favorites[key] = value
+
+            self.other_fields['name_rout'] = self.message.text
+            self.other_fields['favorites'] = new_favorites
+            self.user.parameter.favorites = json.dumps(new_favorites, ensure_ascii=False)
+            self.user.parameter.save()
+
+            self.bot.send_message(self.message.chat.id, f'Маршрут "{self.message.text}" сохранен.')
+
+            self.stage = 0
+
+        elif self.stage == 6.0:
+            # ---------------- 6 этап - удаление маршрута ----------------
+            # Удаляем маршрут из Избранного
+            favorites = json.loads(self.user.parameter.favorites)
+            del favorites[self.other_fields['name_rout']]
+            self.user.parameter.favorites = json.dumps(favorites, ensure_ascii=False)
+            self.user.parameter.save()
+
+            self.bot.send_message(self.message.chat.id, f'Маршрут "{self.other_fields["name_rout"]}" удален.')
+
+            self.stage = 0
+
+            # Может нужно подтверждение?
