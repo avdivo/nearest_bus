@@ -13,7 +13,7 @@ from tbot.models import BotUser
 
 from telebot import types
 
-from tbot.services.executors import Executor, ExeAddBusStop, MyRouter
+from tbot.services.executors import Executor, ExeAddBusStop, MyRouter, MyRouterSetting
 from tbot.services.functions import authorize
 
 
@@ -27,7 +27,7 @@ def menu(bot, message, open_menu=None):
     # Настройки
     settings_menu = {
         'Настройки': [
-            {'Добавить остановку': ExeAddBusStop, 'Редактировать маршрут': Executor},
+            {'Добавить остановку': ExeAddBusStop, 'Редактировать маршрут': MyRouterSetting},
             {'Назад': 'Дополнительно'}
         ]
     }

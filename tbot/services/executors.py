@@ -10,7 +10,7 @@ from telebot import types
 
 from django.utils import timezone
 
-from schedule.models import BusStop, Schedule
+from schedule.models import BusStop, Schedule, Bus
 
 
 class Executor:
@@ -100,7 +100,6 @@ class Executor:
         # Добавляем кнопки в разметку заданное количество раз в строке
         for i in range(0, len(buttons), row):
             keyboard.add(*buttons[i:i+row])
-
         if replace:
             self.bot.edit_message_text(chat_id=self.message.chat.id, message_id=self.message.message_id,
                                        text=message, reply_markup=keyboard)
@@ -200,7 +199,7 @@ class MyRouter(Executor):
         """Показывает короткое расписание автобусов на выбранном маршруте."""
         if self.stage == 0:
             # ---------------- 1 этап - запрос маршрута ----------------
-            # Выводим список маршрутов их Избранного
+            # Выводим список маршрутов из Избранного
             favorites = json.loads(self.user.parameter.favorites)
             self.kb_wait = [self.keyboard('Выберите маршрут:', favorites.keys(), row=1)]
 
@@ -246,3 +245,94 @@ class MyRouter(Executor):
             self.bot.send_message(self.message.chat.id, string)
 
         self.stage += 1
+
+
+class MyRouterSetting(Executor):
+    """Редактирование маршрутов в Избранном.
+    Выводит список маршрутов, предоставляет выбор маршрута для редактирования.
+    Позволяет настроить:
+        - Выбор автобусов
+        - Отображение расписания (по времени или по автобусам)
+        - Количество ближайших автобусов
+        - Переименовать маршрут
+        - Удалить маршрут
+    """
+
+    def make_bus_list(self):
+        """Создает словарь автобусов с помеченными (выбранными).
+        Принимает список автобусов.
+        Возвращает словарь {автобус: True/False}.
+        """
+        buses = dict()
+        for bus in Bus.get_buses():
+            check = False
+            if bus in self.other_fields['favorites']['check']:
+                check = True
+            buses[bus] = check
+        return buses
+
+    def get_favorite(self, name: str):
+        """Возвращает словарь с данными о маршруте из Избранного.
+        Принимает название маршрута."""
+        favorites = json.loads(self.user.parameter.favorites)
+        return favorites[name]
+
+    def set_favorite(self, name: str, value):
+        """Обновляет данные о маршруте в Избранном.
+        Принимает название маршрута и словарь с новыми данными."""
+        favorites = json.loads(self.user.parameter.favorites)
+        favorites[name] = value
+        self.user.parameter.favorites = json.dumps(favorites, ensure_ascii=False)
+        self.user.parameter.save()
+
+    def execute(self):
+        """Показывает короткое расписание автобусов на выбранном маршруте."""
+        if self.stage == 0:
+            # ---------------- 1 этап - запрос маршрута ----------------
+            # Выводим список маршрутов из Избранного
+            favorites = json.loads(self.user.parameter.favorites)
+            self.kb_wait = [self.keyboard('Редактирование маршрута:', favorites.keys(), row=1)]
+
+            self.stage += 1
+
+        elif self.stage == 1:
+            # ---------------- 2 этап - выбор действия ----------------
+            # Получаем данные о маршруте из Избранного
+            favorites = json.loads(self.user.parameter.favorites)
+            self.other_fields['name_rout'] = self.key_name  # Сохраняем название маршрута
+            self.other_fields['favorites'] = favorites[self.key_name]  # Сохраняем данные о настройках маршрута
+
+
+            menu = ['Выбор автобусов', 'Способ отображения расписания',
+                    'Сколько автобусов показывать', 'Переименовать маршрут',
+                    'Удалить маршрут']
+
+            # Выводим клавиатуру с действиями
+            self.kb_wait = [self.keyboard('Выберите действие:', menu, row=1)]
+
+            self.stage = 2.1
+
+        elif self.stage == 2.1:
+            # ---------------- 2.1 этап - вывод списка автобусов ----------------
+            # Список автобусов представляется с возможностью выбора (галочка)
+            TODO: 'Сделать вывод только тех автобусов, которые есть на остановке'
+            self.kb_wait = [self.keyboard('Выберите автобусы:', self.make_bus_list(), row=3)]
+
+            self.stage = 2.2
+
+        elif self.stage == 2.2:
+            # ---------------- 2.2 этап - выбор автобусов в списке  ----------------
+            # Реакция на клик по автобусу
+            if self.key_name in self.other_fields['favorites']['check']:
+                self.other_fields['favorites']['check'].remove(self.key_name)
+            else:
+                self.other_fields['favorites']['check'].append(self.key_name)
+                self.other_fields['favorites']['check'].sort()
+
+            # Выводим клавиатуру с заменой предыдущей
+            self.kb_wait = [self.keyboard('Выберите автобусы:', self.make_bus_list(), row=3, replace=True)]
+
+            # Сохраняем изменения в Избранном
+            self.set_favorite(self.other_fields['name_rout'], self.other_fields['favorites'])
+
+

@@ -123,6 +123,16 @@ class Bus(models.Model):
                                      related_name='buses')
     active = models.BooleanField(verbose_name='Автобус ходит', default=True)
 
+    @staticmethod
+    def get_buses(only_active=True):
+        """Возвращает список автобусов.
+        Принимает параметр вернуть все автобусы, не только активные.
+        """
+        if only_active:
+            return Bus.objects.filter(active=True).values_list('number', flat=True)
+        else:
+            return Bus.objects.all().values_list('number', flat=True)
+
     def __str__(self):
         return str(f'Автобус №{self.number}')
 

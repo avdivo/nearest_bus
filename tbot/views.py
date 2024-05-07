@@ -9,10 +9,10 @@ from django.views.decorators.csrf import csrf_exempt
 
 from .services.menu import menu
 from .services.functions import authorize
-from .services.executors import ExeAddBusStop, MyRouter
+from .services.executors import ExeAddBusStop, MyRouter, MyRouterSetting
 
 
-TOKEN = ''
+TOKEN = '7019444368:AAFUiHbtAvmERwxUoP_GemKTlPas2rm_DSM'
 bot = telebot.TeleBot(TOKEN, threaded=False)
 #
 #
