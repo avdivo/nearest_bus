@@ -85,3 +85,15 @@ def add_time_point(day: str, time: str, bus: Bus, bus_stop: BusStop):
     Schedule.objects.create(day=get_day_number(day), time=datetime.strptime(time, "%H:%M").time(),
              bus=bus, bus_stop=bus_stop)
 
+
+def clear_all_tables():
+    """Очистка всех таблиц расписания автобусов в БД."""
+    # Сначала удаляем объекты из таблиц, которые не имеют внешних ссылок
+    Schedule.objects.all().delete()
+    Order.objects.all().delete()
+    # Затем удаляем объекты из таблиц, которые могут иметь внешние ссылки
+    Router.objects.all().delete()
+    Bus.objects.all().delete()
+    BusStop.objects.all().delete()
+
+    print('Все таблицы расписания автобусов очищены.')

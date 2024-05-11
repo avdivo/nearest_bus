@@ -24,8 +24,11 @@ import os
 import json
 
 from schedule.services.add_to_models import (add_bus, add_bus_stop, add_final_stop_to_bus_stop,
-                                             add_router, add_final_stop_to_bus, add_order, add_time_point)
+                                             add_router, add_final_stop_to_bus, add_order,
+                                             add_time_point, clear_all_tables)
 
+
+clear_all_tables()  # Очистка всех таблиц БД (перед импортом новых данных)
 
 # Получение данных из файла
 try:
@@ -68,7 +71,7 @@ for bus, directions in data.items():  # Номер автобуса и назв�
         # Добавляем маршрут +++++++++++++++++++
         router_obj = add_router(bus_stop_start_obj, bus_stop_end_obj, bus_obj)
 
-        for bus_stop, rest in bus_stops.items():  # Остановка и остальные данные (в т.ч. расписание)
+        for i, (bus_stop, rest) in enumerate(bus_stops.items()):  # Остановка и остальные данные (в т.ч. расписание)
 
             external_id = rest['id']  # id остановок по Миноблавтотранс
             schedules = rest['schedule']  # Списки расписаний по дням недели
@@ -82,6 +85,10 @@ for bus, directions in data.items():  # Номер автобуса и назв�
             # Добавление номера следования остановки в маршруте +++++++++++++++++++
             add_order(router_obj, bus_stop_obj)
 
+            if i == len(bus_stops) - 1:
+                # Если это последняя остановка в маршруте, ее расписание записывать не нужно
+                # там время прибытия на остановку.
+                continue
             for day, times in schedules.items():  # Разбираем расписания по дням недели
                 for time in times:  # Разбираем список с временными метками в виде строк
                     add_time_point(day, time, bus_obj, bus_stop_obj)

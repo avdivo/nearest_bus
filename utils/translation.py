@@ -13,7 +13,8 @@ def get_day_string(day_as_int: int):
 def get_day_number(day_as_string: str):
     """Возвращает номер дня недели в зависимости от сокращенного названия.
     Принимает строку дня в неделе."""
+    day = day_as_string.lower()
     days = ['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс']
-    if day_as_string in days:
-        return days.index(day_as_string) + 1
+    if day in days:
+        return days.index(day) + 1
     raise 'Не правильное сокращение дня недели.'

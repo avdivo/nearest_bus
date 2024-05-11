@@ -5,13 +5,63 @@ import re
 import json
 import random
 import string
-import telebot
-import datetime
+from datetime import datetime, date
 from telebot import types
 
 from django.utils import timezone
 
 from schedule.models import BusStop, Schedule, Bus
+from utils.translation import get_day_string, get_day_number
+
+
+def time_generator(time_marks, start_time, duration) -> list:
+    """Генератор временных меток, возвращающий временные метки из списка.
+    Принимает список временных меток, стартовое время и продолжительность в минутах.
+    Возвращает временные метки из списка, начиная со стартового времени, пока не пройдет
+    указанное количество минут. Если время переходит через 00:00, продолжает считать.
+    Рассматривая таким образом список закольцованным, а отрезок времени накладывается
+    по периметру кольца, возвращая метки, которые накрыты отрезком.
+    """
+    def dif_to_minutes(time1, time2):
+        """Разница в минутах между двумя значениями времени в формате datetime.time"""
+        # Преобразование в объекты datetime.datetime
+        datetime1 = datetime.combine(date.today(), time1)
+        datetime2 = datetime.combine(date.today(), time2)
+        # Вычисление разницы в минутах
+        difference = datetime1 - datetime2
+        return difference.total_seconds() / 60
+
+    if not time_marks:
+        return []
+    # Находим индекс временной метки, с которой начнем генерацию
+    index = None
+    for time in time_marks:
+        if time >= start_time:
+            index = time_marks.index(time)
+            break
+    index = 0 if index is None else index
+
+    counter = 0  # Счетчик минут
+    time = datetime.strptime('23:59', '%H:%M').time()
+
+    while True:
+        if time_marks[index] > start_time:
+            # Если следующее время больше стартового, то еще не было перехода через 00:00
+            # Добавляем минуты между временами в счетчик
+            counter += dif_to_minutes(time_marks[index], start_time)
+            start_time = time_marks[index]
+        else:
+            # Если следующее время меньше стартового, значит был переход через 00:00
+            # Добавляем минуты между временем и 00:00
+            counter += dif_to_minutes(time, start_time) + 1
+            # Добавляем минуты между 00:00 и новым временем
+            counter += time_marks[index].hour * 60 + time_marks[index].minute
+            start_time = time_marks[index]
+        index = (index + 1) % len(time_marks)  # Переход к следующему времени (закольцованный список)
+        if counter > duration:
+            # Если счетчик превысил продолжительность, то выходим из цикла
+            return
+        yield start_time  # Возвращаем время
 
 
 class Executor:
@@ -91,7 +141,7 @@ class Executor:
             name_dict = {name: False for name in names}
 
         # Подготовка клавиатуры
-        keyboard = types.InlineKeyboardMarkup()
+        keyboard = types.InlineKeyboardMarkup(row_width=row)
         buttons = []
         for name, selected in name_dict.items():
             sel = '✓ ' if selected else ''
@@ -180,6 +230,11 @@ class ExeAddBusStop(Executor):
                 self.bot.send_message(self.message.chat.id, 'В новом названии использованы недопустимые символы, '
                                                             'пожалуйста, введите другое название.')
                 return
+            favorites = json.loads(self.user.parameter.favorites)
+            if name in favorites:
+                self.bot.send_message(self.message.chat.id, 'Маршрут с таким именем уже существует, '
+                                                            'пожалуйста, введите другое название.')
+                return
 
             if not name:
                 name = f'Маршрут {self.other_fields["start"]} - {self.other_fields["finish"]}'
@@ -187,7 +242,7 @@ class ExeAddBusStop(Executor):
             # Сохраняем маршрут в Избранное (favorites)
             save = json.loads(self.user.parameter.favorites)
             save[name] = {'start': self.other_fields['start'], 'finish': self.other_fields['finish'],
-                         'check': self.other_fields['check']}
+                          'check': self.other_fields['check']}
             self.user.parameter.favorites = json.dumps(save, ensure_ascii=False)
             self.user.parameter.save()
 
@@ -203,7 +258,7 @@ class MyRouter(Executor):
     Отображает расписание на начальной остановке маршрута."""
 
     def execute(self):
-        """Показывает короткое расписание автобусов на выбранном маршруте."""
+        """Показывает короткое расписание автобусов на выбранной остановке."""
         if self.stage == 0:
             # ---------------- 1 этап - запрос маршрута ----------------
             # Выводим список маршрутов из Избранного
@@ -212,46 +267,112 @@ class MyRouter(Executor):
 
         if self.stage == 1:
             # ---------------- 2 этап - вывод расписания ----------------
+            week = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
+            # Текущий день недели (1-7)
+            day = datetime.now().isoweekday()
+            count = None  # Указывает на то, что не нужно выводить расписание за сутки дня
+            check = None  # Список автобусов, которые будут выводиться
+
             # Получаем данные о маршруте
             favorites = json.loads(self.user.parameter.favorites)
-            start = favorites[self.key_name]['start']
-            check = favorites[self.key_name]['check']
+            if self.key_name in favorites:
+                # Сохраняем выбранный маршрут
+                self.other_fields['rout'] = self.key_name
+
+            key_name = self.other_fields['rout']
+            if check is None:
+                # Если список автобусов уже не определен
+                check = favorites[key_name]['check']
 
             # Находим объект остановки по id
+            start = favorites[key_name]['start']
             start = BusStop.objects.get(external_id=start)
 
             # Определяем текущее время с поправкой на часовой пояс
             current_timezone = timezone.get_current_timezone()
             utc_time = timezone.now()  # получаем текущее время в UTC
-            now = utc_time.astimezone(current_timezone).time()  # конвертируем время в текущий часовой пояс
+            time_now = utc_time.astimezone(current_timezone).time()  # конвертируем время в текущий часовой пояс
 
-            # Создать переменную с временем 15:21
-            now = datetime.time(15, 21)
+            # Вид отображения расписания
+            mode = favorites[key_name].get('view', 'По времени')
 
-            # Текущий день недели (1-7)
-            day = datetime.datetime.now().isoweekday()
+            # Возможно передан день недели из дополнительной клавиатуры.
+            # Значит выводим полное расписание остановки за выбранный день.
+            if self.key_name in week:
+                count = '24 часа'
+                day = get_day_number(self.key_name)  # Получаем номер дня недели
+                buses_obj = start.get_bus_by_stop()  # Получаем список автобусов на остановке
+                check = [bus.number for bus in buses_obj]  # В данном случае показываем все
+                time_now = datetime.strptime('03:00', '%H:%M').time()  # Время начала дня
+                mode = 'По автобусам'
+
+            # За какой промежуток времени выводить расписание
+            if count is None:
+                count = favorites[key_name].get('count', '30 минут')
+            delta = {
+                '15 минут': 15,
+                '30 минут': 30,
+                '1 час': 60,
+                '2 часа': 120,
+                '3 часа': 180,
+                '24 часа': 1440
+            }
 
             # Для каждого автобуса в списке из favorites.
             # Найдем в модели Schedule 2 записи с этим автобусом и остановкой start после текущего времени.
             # Отсортируем по времени и сохраним в словарь по автобусу.
+
+            # От способа отображения зависит способ сборки данных и вывода.
+            # Для вида По автобусам создаем словарь {автобус: [время1, время2 (в datetime)]}
+            # Для вида По времени создаем словарь {время (в datetime): [автобус1, автобус2]}
             schedule = dict()
             for bus in check:
                 # Находим записи в расписании
-                sch = Schedule.objects.filter(bus_stop=start, bus__number=bus, time__gte=now, day=day).order_by('time')
-                time_strings = [time_obj.strftime('%H:%M') for time_obj in sch.values_list('time', flat=True)]
-                schedule[bus] = time_strings  # Сохраняем в словарь
+                sch = Schedule.objects.filter(
+                    bus_stop=start, bus__number=bus, day=day).order_by('time')
+                if len(sch) == 0:  # Если записей нет, переходим к следующему автобусу
+                    continue
+                if mode == 'По времени':
+                    # Сохраняем в словарь
+                    for time_obj in sch:
+                        if time_obj.time not in schedule:
+                            schedule[time_obj.time] = [bus]
+                        else:
+                            schedule[time_obj.time].append(bus)
+                    # Сортируем по времени
+                    schedule = dict(sorted(schedule.items(), key=lambda x: x[0]))
+                    gen = time_generator(list(schedule), time_now, delta[count])
+                    schedule = {time: schedule[time] for time in gen}
+                else:
+                    # Сохраняем в словарь
+                    gen = time_generator([time_obj.time for time_obj in sch], time_now, delta[count])
+                    times = [time for time in gen]
+                    if times:
+                        schedule[bus] = times
 
-            # Составляем строку для сообщения
-            string = f'{self.key_name}\n"{start.name}"\n'
-            for bus, times in schedule.items():
-                times = times[:2]  # Выводим только первые 2 времени
-                if times:
-                    string += f'Автобус {bus}: {",  ".join(times)}\n\n'
+            # Выводим только count временных отметок для каждого автобуса в режиме По автобусам
+            # В режиме По времени выводим только count временных отметок
+            string = f'Маршрут *"{key_name}"*\nот остановки *"{start.name}"*\nна период *{count}*   ({get_day_string(day)})\n\n'
+            if not schedule:
+                if count == '24 часа':
+                    string += 'Автобусы уже не ходят.\n'
+                else:
+                    string += f'Нет автобусов на период - *{count}*.\n'
+            if mode == 'По автобусам':
+                for bus, times in schedule.items():
+                    string += f'*Автобус №{bus}*  -  {",  ".join(time.strftime("%H:%M") for time in times)}\n\n'
+            else:
+                for time, buses in schedule.items():
+                    string += f'{time.strftime("%H:%M")}  -  '
+                    buses = [f'№{bus}' for bus in buses]
+                    string += f'{",  ".join(buses)}\n'
 
             # Отправляем расписание
-            self.bot.send_message(self.message.chat.id, string)
+            self.bot.send_message(self.message.chat.id, string, parse_mode='Markdown')
 
-        self.stage += 1
+            # Формируем клавиатуру для дополнительных действий
+            self.kb_wait = [self.keyboard(f'Полное расписание на любой день:', week, row=7)]
+        self.stage = 1
 
 
 class MyRouterSetting(Executor):
@@ -308,7 +429,7 @@ class MyRouterSetting(Executor):
         menu = {
             'Выбор автобусов': 2.0,
             'Вид расписания': 3.0,
-            'Сколько автобусов показывать': 4.0,
+            'Промежуток времени': 4.0,
             'Переименовать маршрут': 5.0,
             'Удалить маршрут': 6.0
         }
@@ -394,10 +515,12 @@ class MyRouterSetting(Executor):
                 # Если количество автобусов уже было выбрано, то выводим его
                 check = self.other_fields['favorites']['count']
             else:
-                check = '2'
+                check = '30 минут'
 
-            menu = self.make_checking_dict_by_list(['2', '3', '4', '5', 'Все'], [check])
-            self.kb_wait = [self.keyboard(f'Сколько автобусов показывать для маршрута\n"{self.other_fields["name_rout"]}":',
+            menu = self.make_checking_dict_by_list(['15 минут', '30 минут', '1 час', '2 часа', '3 часа', '24 часа'], [check])
+            self.kb_wait = [
+                self.keyboard(f'За какой промежуток времени начиная от текущего '
+                              f'показать автобусы для маршрута\n"{self.other_fields["name_rout"]}":',
                                           menu, row=2)]
 
             self.stage = 4.1
@@ -405,8 +528,9 @@ class MyRouterSetting(Executor):
         elif self.stage == 4.1:
             # ---------------- 4.1 этап - записать количество автобусов ----------------
             # Реакция на клик по количеству автобусов
-            menu = self.make_checking_dict_by_list(['2', '3', '4', '5', 'Все'], [self.key_name])
-            self.kb_wait = [self.keyboard(f'Сколько автобусов показывать для маршрута\n"{self.other_fields["name_rout"]}":',
+            menu = self.make_checking_dict_by_list(['15 минут', '30 минут', '1 час', '2 часа', '3 часа', '24 часа'], [self.key_name])
+            self.kb_wait = [self.keyboard(f'За какой промежуток времени начиная от текущего '
+                              f'показать автобусы для маршрута\n"{self.other_fields["name_rout"]}":',
                                           menu, row=2, replace=True)]
 
             # Сохраняем изменения в Избранном
@@ -429,6 +553,12 @@ class MyRouterSetting(Executor):
                 self.bot.send_message(self.message.chat.id, 'В новом названии использованы недопустимые символы, '
                                                             'пожалуйста, введите другое название.')
                 return
+            favorites = json.loads(self.user.parameter.favorites)
+            if self.message.text in favorites:
+                self.bot.send_message(self.message.chat.id, 'Маршрут с таким именем уже существует, '
+                                                            'пожалуйста, введите другое название.')
+                return
+
 
             favorites = json.loads(self.user.parameter.favorites)
             new_favorites = dict()
@@ -457,8 +587,8 @@ class MyRouterSetting(Executor):
             if 'del' not in self.other_fields:
                 self.other_fields['del'] = 1
                 self.bot.send_message(self.message.chat.id, f'Для удаления маршрута "{self.other_fields["name_rout"]}" '
-                                                            'подтвердите действие, нажав повторно кнопку удаления через'
-                                                            '15 секунд, после того, как она перестанет переливаться.')
+                                                            'подтвердите действие, нажав повторно кнопку "Удалить маршрут" через '
+                                                            '15 секунд, после того как она перестанет переливаться.')
                 return
 
             favorites = json.loads(self.user.parameter.favorites)

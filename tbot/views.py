@@ -2,6 +2,7 @@ import random
 import string
 
 import telebot
+import traceback
 from telebot import types
 from django.http import HttpResponse
 from django.core.exceptions import PermissionDenied
@@ -40,6 +41,7 @@ def greet(message):
         menu(bot, message, 'Главное меню')
     except Exception as e:
         print(f"Произошла ошибка: {e}")
+        traceback.print_exc()
         bot.send_message(message.chat.id, "Произошла ошибка, попробуйте снова.")
 
 
@@ -62,7 +64,8 @@ def callback_inline(call):
                 print(f"Произошла ошибка 1:")
                 bot.send_message(call.message.chat.id, "Запрос не обработан.")
         except Exception as e:
-            print(f"Произошла ошибка 2: {e}")
+            print(f"Произошла ошибка: {e}")
+            traceback.print_exc()
             bot.send_message(call.message.chat.id, "Произошла ошибка, попробуйте снова.")
 
 
@@ -72,6 +75,7 @@ def echo_message(message):
         menu(bot, message)
     except Exception as e:
         print(f"Произошла ошибка: {e}")
+        traceback.print_exc()
         bot.send_message(message.chat.id, "Произошла ошибка, попробуйте снова.")
 
 # def create_keyboard(user):
