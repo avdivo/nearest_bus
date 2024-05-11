@@ -263,6 +263,9 @@ class MyRouter(Executor):
             # ---------------- 1 этап - запрос маршрута ----------------
             # Выводим список маршрутов из Избранного
             favorites = json.loads(self.user.parameter.favorites)
+            if not favorites:
+                self.bot.send_message(self.message.chat.id, 'У вас нет сохраненных маршрутов.')
+                return
             self.kb_wait = [self.keyboard('Выберите маршрут:', favorites.keys(), row=1)]
 
         if self.stage == 1:
