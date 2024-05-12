@@ -10,8 +10,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
-from pathlib import Path
 import os
+import json
+from pathlib import Path
 from environs import Env
 
 
@@ -28,6 +29,7 @@ env.read_env(dotenv_path)
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env('SECRET_KEY')
 TOKEN = env('BOT_TOKEN')
+ADMINS = json.loads(env('ADMINS'))
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True

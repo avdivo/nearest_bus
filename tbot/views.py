@@ -1,4 +1,6 @@
+import json
 import telebot
+import logging
 import traceback
 from django.http import HttpResponse
 from django.core.exceptions import PermissionDenied
@@ -16,6 +18,14 @@ bot = telebot.TeleBot(settings.TOKEN, threaded=False)
 # # For free PythonAnywhere accounts
 # # tbot = telebot.AsyncTeleBot(TOKEN)
 #
+
+# Настройка логирования
+logger = telebot.logger
+telebot.logger.setLevel(logging.INFO)  # или logging.DEBUG для более подробного вывода
+fh = logging.FileHandler('telebot.log')
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+fh.setFormatter(formatter)
+logger.addHandler(fh)
 
 @csrf_exempt
 def telegram(request):
@@ -37,9 +47,24 @@ def greet(message):
     try:
         menu(bot, message, 'Главное меню')
     except Exception as e:
-        print(f"Произошла ошибка: {e}")
-        traceback.print_exc()
+        logger.error('---' * 10)
+        logger.error(f"Произошла ошибка для пользователя {message.from_user.id}: {e}")
+        logger.error(traceback.format_exc())
         bot.send_message(message.chat.id, "Произошла ошибка, попробуйте снова.")
+
+
+@bot.message_handler(commands=['message'])
+def handle_message(message):
+    text = message.text.split(' ', 1)[1] if len(message.text.split(' ', 1)) > 1 else ''
+    chat_id = message.chat.id
+    user_id = message.from_user.id
+
+    # Преобразуем строку JSON в список
+    admin_ids = settings.ADMINS
+
+    # Отправляем сообщение каждому администратору
+    for admin_id in admin_ids:
+        bot.send_message(admin_id, f"Пользователь с ID {user_id} и ID чата {chat_id} отправил сообщение: {text}")
 
 
 @bot.callback_query_handler(func=lambda call: True)
@@ -52,26 +77,25 @@ def callback_inline(call):
                 raise PermissionDenied
             class_name = user.parameter.class_name
             if class_name:
-                # В переменной class_name хранится название класса программы,
-                # которая выполняется для этого пользователя, создаем объект,
-                # одновременно запустится продолжение выполнения программы.
-                executor = globals()[class_name](bot, user, call)
+                globals()[class_name](bot, user, call)
             else:
-                # Если нет программы, сообщаем об ошибке, такого быть не должно
-                print(f"Произошла ошибка 1:")
+                logger.error('---' * 10)
+                logger.error(f"Произошла ошибка для пользователя {call.from_user.id}:")
                 bot.send_message(call.message.chat.id, "Запрос не обработан.")
         except Exception as e:
-            print(f"Произошла ошибка: {e}")
-            traceback.print_exc()
-            bot.send_message(call.message.chat.id, "Произошла ошибка, попробуйте снова.")
 
+            # отделить записи в логах
+            logger.error('---'*10)
+            logger.error(f"Произошла ошибка для пользователя {call.from_user.id}: {e}")
+            logger.error(traceback.format_exc())
+            bot.send_message(call.message.chat.id, "Произошла ошибка, попробуйте снова.")
 
 @bot.message_handler(func=lambda message: True)
 def echo_message(message):
     try:
         menu(bot, message)
     except Exception as e:
-        print(f"Произошла ошибка: {e}")
-        traceback.print_exc()
+        logger.error('---' * 10)
+        logger.error(f"Произошла ошибка для пользователя {message.from_user.id}: {e}")
+        logger.error(traceback.format_exc())
         bot.send_message(message.chat.id, "Произошла ошибка, попробуйте снова.")
-

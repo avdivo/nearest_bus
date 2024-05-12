@@ -15,8 +15,8 @@ def authorize(from_user) -> BotUser:
         user = BotUser.objects.filter(user_id=user_id).first()
         if not user:
             # Добавляем пользователя в БД
-            first_name = from_user.first_name
-            username = from_user.username
+            first_name = from_user.first_name if from_user.first_name else "NoName"
+            username = from_user.username if from_user.username else "NoLogin"
             user = BotUser.objects.create(user_id=user_id, user_name=first_name, user_login=username)
             user.save()
         return user
