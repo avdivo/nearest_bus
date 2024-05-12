@@ -53,18 +53,18 @@ def greet(message):
         bot.send_message(message.chat.id, "Произошла ошибка, попробуйте снова.")
 
 
-# @bot.message_handler(commands=['message'])
-# def handle_message(message):
-#     text = message.text.split(' ', 1)[1] if len(message.text.split(' ', 1)) > 1 else ''
-#     chat_id = message.chat.id
-#     user_id = message.from_user.id
-#
-#     # Преобразуем строку JSON в список
-#     admin_ids = settings.ADMINS
-#
-#     # Отправляем сообщение каждому администратору
-#     for admin_id in admin_ids:
-#         bot.send_message(admin_id, f"Пользователь с ID {user_id} и ID чата {chat_id} отправил сообщение: {text}")
+@bot.message_handler(commands=['message'])
+def handle_message(message):
+    text = message.text.split(' ', 1)[1] if len(message.text.split(' ', 1)) > 1 else ''
+    chat_id = message.chat.id
+    user_id = message.from_user.id
+
+    # Преобразуем строку JSON в список
+    admin_ids = settings.ADMINS
+
+    # Отправляем сообщение каждому администратору
+    for admin_id in admin_ids:
+        bot.send_message(admin_id, f"Пользователь с ID {user_id} и ID чата {chat_id} отправил сообщение: {text}")
 
 
 @bot.callback_query_handler(func=lambda call: True)
