@@ -13,7 +13,7 @@ from tbot.models import BotUser
 
 from telebot import types
 
-from tbot.services.executors import Executor, ExeAddBusStop, MyRouter, MyRouterSetting
+from tbot.services.executors import Executor, ExeAddBusStop, MyRouter, MyRouterSetting, ExeMessage
 from tbot.services.functions import authorize
 
 
@@ -97,7 +97,6 @@ def menu(bot, message, open_menu=None):
         for item in kb[point_menu]:
             markup.row(*(types.KeyboardButton(button) for button in item.keys()))
         bot.send_message(message.chat.id, f'{point_menu}', reply_markup=markup)
-
         return
 
     # Мы пришли сюда если в point_menu пусто или там имя класса новой программы.
@@ -113,8 +112,11 @@ def menu(bot, message, open_menu=None):
         # В переменной class_name хранится название класса программы,
         # которая выполняется для этого пользователя, создаем объект,
         # одновременно запустится продолжение выполнения программы.
+        print(user.parameter.class_name)
         answer = globals()[user.parameter.class_name](bot, user, message)
 
+        print(f"Ответ программы: {answer}", message.text)
+        return
         # Тут можно обработать необработанные сообщения, если answer is None.
 
     else:

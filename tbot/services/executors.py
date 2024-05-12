@@ -9,6 +9,7 @@ from datetime import datetime, date
 from telebot import types
 
 from django.utils import timezone
+from django.conf import settings
 
 from schedule.models import BusStop, Schedule, Bus
 from utils.translation import get_day_string, get_day_number
@@ -602,3 +603,38 @@ class MyRouterSetting(Executor):
             self.bot.send_message(self.message.chat.id, f'Маршрут "{self.other_fields["name_rout"]}" удален.')
 
             self.stage = 0
+
+
+class ExeMessage(Executor):
+    """Прием сообщений от пользователей.
+    Этот класс работает, когда пользователь отправляет команду /message."""
+
+    def execute(self):
+        """Принимает сообщение от пользователя и передает администратору.
+        Если сообщение начинается с Answer_to_, то это ответ на сообщение.
+        Ответ отправляется в чат с указанным id."""
+        text = self.message.text
+        chat_id = self.message.chat.id
+        user_id = self.message.from_user.id
+
+        # Если в начале текста Answer_to_ ... - это ответ на сообщение
+        # Берем первое слово, оно состоит из Answer_to_dddd,
+        # где dddd - id чата в который отвечаем, далее сообщение
+        if text.startswith('Answer_to_'):
+            # Разделяем первым пробелом сообщение на 2 части
+            chat_id, text = text.split(' ', 1)
+            chat_id = int(chat_id.split('_')[2])
+            self.bot.send_message(chat_id, text)
+            ok = 'Сообщение отправлено'
+        else:
+            # Преобразуем строку JSON в список (это id администраторов)
+            admin_ids = settings.ADMINS
+
+            # Отправляем сообщение каждому администратору
+            for admin_id in admin_ids:
+                self.bot.send_message(admin_id, f"Пользователь с ID {user_id} и ID чата {chat_id} отправил сообщение: {text}")
+                self.bot.send_message(admin_id, f"Answer_to_{chat_id} ")
+
+            ok = "Ваше сообщение отправлено разработчику. Благодарим за обратную связь!"
+
+        self.bot.send_message(self.message.chat.id, ok)

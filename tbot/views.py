@@ -55,16 +55,14 @@ def greet(message):
 
 @bot.message_handler(commands=['message'])
 def handle_message(message):
-    text = message.text.split(' ', 1)[1] if len(message.text.split(' ', 1)) > 1 else ''
-    chat_id = message.chat.id
-    user_id = message.from_user.id
-
-    # Преобразуем строку JSON в список
-    admin_ids = settings.ADMINS
-
-    # Отправляем сообщение каждому администратору
-    for admin_id in admin_ids:
-        bot.send_message(admin_id, f"Пользователь с ID {user_id} и ID чата {chat_id} отправил сообщение: {text}")
+    bot.send_message(message.chat.id, "Напишите сообщение разработчику.")
+    user = authorize(message.from_user)
+    if not user:
+        # Для ботов
+        raise PermissionDenied
+    # Работает исполнитель в классе ExeMessage
+    user.parameter.class_name = 'ExeMessage'
+    user.parameter.save()
 
 
 @bot.callback_query_handler(func=lambda call: True)
