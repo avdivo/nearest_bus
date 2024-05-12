@@ -5,8 +5,8 @@ from django.db import models
 
 class BotUser(models.Model):
     """Пользователи приложения."""
-    user_name = models.CharField(verbose_name='Имя', max_length=100)
-    user_login = models.CharField(verbose_name='Логин', max_length=100)
+    user_name = models.CharField(verbose_name='Имя', max_length=100, default='noname')
+    user_login = models.CharField(verbose_name='Логин', max_length=100, default='noname')
     user_id = models.CharField(verbose_name='Идентификатор', max_length=15)
     user_menu = models.CharField(verbose_name='Меню пользователя', max_length=50, default='Главное меню')
 

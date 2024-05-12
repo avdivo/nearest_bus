@@ -1,5 +1,4 @@
 import telebot
-import logging
 import traceback
 from django.http import HttpResponse
 from django.core.exceptions import PermissionDenied
@@ -17,14 +16,6 @@ bot = telebot.TeleBot(settings.TOKEN, threaded=False)
 # # For free PythonAnywhere accounts
 # # tbot = telebot.AsyncTeleBot(TOKEN)
 #
-
-# Настройка логирования
-logger = telebot.logger
-telebot.logger.setLevel(logging.INFO)  # или logging.DEBUG для более подробного вывода
-fh = logging.FileHandler('telebot.log')
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-fh.setFormatter(formatter)
-logger.addHandler(fh)
 
 @csrf_exempt
 def telegram(request):
