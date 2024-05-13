@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import BusStop, Order, Router, Bus, Schedule
+from .models import BusStop, Order, Router, Bus, Schedule, Holiday
 
 
 @admin.register(BusStop)
@@ -34,3 +34,11 @@ class ScheduleAdmin(admin.ModelAdmin):
     list_filter = ('bus', 'bus_stop', 'day')
     search_fields = ('bus', 'bus_stop', 'time')
     list_editable = ('time', 'day')
+
+
+@admin.register(Holiday)
+class HolidayAdmin(admin.ModelAdmin):
+    """Настройки в Админке"""
+    list_display = ('date', 'day', 'name')
+    # list_editable = ('name')
+

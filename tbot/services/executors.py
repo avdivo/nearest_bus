@@ -11,7 +11,7 @@ from telebot import types
 from django.utils import timezone
 from django.conf import settings
 
-from schedule.models import BusStop, Schedule
+from schedule.models import BusStop, Schedule, Holiday
 from tbot.models import IdsForName
 
 from utils.translation import get_day_string, get_day_number
@@ -267,8 +267,11 @@ class MyRouter(Executor):
         if self.stage == 1:
             # ---------------- 2 этап - вывод расписания ----------------
             week = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
-            # Текущий день недели (1-7)
-            day = datetime.now().isoweekday()
+            # Текущий день недели (1-7), если дата переопределена в таблице,
+            # вернет значение из нее, иначе текущий день недели
+            day = Holiday.is_today_holiday()
+            day = day if day else datetime.now().isoweekday()
+
             count = None  # Указывает на то, что не нужно выводить расписание за сутки дня
             check = None  # Список автобусов, которые будут выводиться
 

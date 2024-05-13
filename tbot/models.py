@@ -59,7 +59,7 @@ class Parameter(models.Model):
             self.save()
 
     def __str__(self):
-        return str(f'{self.name}')
+        return str(f'{self.bot_user} - {self.class_name}')
 
     class Meta:
         verbose_name = 'Дополнительный параметр'

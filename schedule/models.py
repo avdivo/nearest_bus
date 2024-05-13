@@ -31,6 +31,8 @@ Schedule - расписание
 """
 
 from django.db import models
+from django.utils import timezone
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 from utils.translation import get_day_string
@@ -208,3 +210,35 @@ class Schedule(models.Model):
     class Meta:
         verbose_name = 'Время'
         verbose_name_plural = 'Время'
+
+
+class Holiday(models.Model):
+    """Переопределяемые дни. Указываем дату, причину и день недели
+    которому он будет соответствовать. Например, суббота какой-то даты
+    будет рабочей, за прошлый понедельник. Тогда записываем дату этой субботы и
+    день недели которым она будет считаться."""
+    date = models.DateField(verbose_name='Дата праздника', unique=True)
+    name = models.CharField(verbose_name='Название праздника', max_length=100)
+    day = models.IntegerField(verbose_name='День недели',
+                              validators=[MinValueValidator(1), MaxValueValidator(7)], default=7)
+
+    @staticmethod
+    def is_today_holiday():
+        """Если дата есть в таблице, возвращает день недели которым она будет считаться."""
+        # Определяем текущую дату с поправкой на часовой пояс
+        current_timezone = timezone.get_current_timezone()
+        utc_time = timezone.now()  # получаем текущую дату в UTC
+        date_now = utc_time.astimezone(current_timezone).date()  # конвертируем дату в текущий часовой пояс
+        # Есть ли дата в списке праздников
+        try:
+            day = Holiday.objects.get(date=date_now).day
+        except ObjectDoesNotExist:
+            day = None
+        return day
+
+    def __str__(self):
+        return str(f"{self.date} {self.name}")
+
+    class Meta:
+        verbose_name = 'Праздник'
+        verbose_name_plural = 'Праздники'
