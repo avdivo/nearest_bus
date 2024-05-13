@@ -34,9 +34,9 @@ ADMINS = json.loads(env('ADMINS'))
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['https://7365ed903c71.vps.myjino.ru', '*']
+ALLOWED_HOSTS = ['https://7365ed903c71.vps.myjino.ru', 'https://remontnoutbukoff.ru', '*']
 
-CSRF_TRUSTED_ORIGINS = ['remontnoutbukoff.ru', 'https://7365ed903c71.vps.myjino.ru']
+CSRF_TRUSTED_ORIGINS = ['https://remontnoutbukoff.ru', 'https://7365ed903c71.vps.myjino.ru']
 
 # Application definition
 
