@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import BotUser, Parameter
+from .models import BotUser, Parameter, IdsForName
 
 
 @admin.register(BotUser)
@@ -18,3 +18,7 @@ class ParameterAdmin(admin.ModelAdmin):
     search_fields = ['class_name', 'bot_user']
 
 
+@admin.register(IdsForName)
+class IdsForNameAdmin(admin.ModelAdmin):
+    """Идентификаторы в Админке"""
+    list_display = ('name', 'id')
