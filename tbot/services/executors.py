@@ -151,7 +151,7 @@ class Executor:
         keyboard = types.InlineKeyboardMarkup(row_width=row)
         buttons = []
         for name, selected in name_dict.items():
-            sel = '✓ ' if selected else ''
+            sel = '⚡️ ' if selected else ''
             id_name = IdsForName.get_id_by_name(name)  # Получаем идентификатор по имени
             button = types.InlineKeyboardButton(text=sel+name, callback_data=f'{kd_id}_{id_name}')
             buttons.append(button)
@@ -220,7 +220,6 @@ class ExeAddBusStop(Executor):
             base_name = f'{start_name} - {self.key_name}'
             name = base_name
             i = 1
-            print(favorites, name)
             while name in favorites:
                 name = f'{base_name} {str(i)}'
                 i += 1
@@ -233,7 +232,7 @@ class ExeAddBusStop(Executor):
 
             # Отправляем сообщение со списком автобусов и приглашением ввести имя для сохранения
             self.bot.send_message(self.message.chat.id, string)
-            self.bot.send_message(self.message.chat.id, f'🚥 Маршрут сохранен в Мои маршруты под именем:\n{name}')
+            self.bot.send_message(self.message.chat.id, f'💾 Маршрут сохранен в Мои маршруты под именем:\n"{name}"')
 
             # Сохраняем параметры
             self.other_fields['finish'] = bs_dict['finish'].external_id
@@ -573,7 +572,7 @@ class MyRouterSetting(Executor):
             self.user.parameter.favorites = json.dumps(new_favorites, ensure_ascii=False)
             self.user.parameter.save()
 
-            self.bot.send_message(self.message.chat.id, f'Маршрут "{self.message.text}" сохранен.')
+            self.bot.send_message(self.message.chat.id, f'💾 Маршрут "{self.message.text}" сохранен.')
 
             self.stage = 0
 
@@ -596,7 +595,7 @@ class MyRouterSetting(Executor):
             self.user.parameter.favorites = json.dumps(favorites, ensure_ascii=False)
             self.user.parameter.save()
 
-            self.bot.send_message(self.message.chat.id, f'Маршрут "{self.other_fields["name_rout"]}" удален.')
+            self.bot.send_message(self.message.chat.id, f'❗️Маршрут "{self.other_fields["name_rout"]}" удален.')
 
             self.stage = 0
 
