@@ -32,7 +32,7 @@ TOKEN = env('BOT_TOKEN')
 ADMINS = json.loads(env('ADMINS'))
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['https://7365ed903c71.vps.myjino.ru', 'https://remontnoutbukoff.ru', '*']
 
