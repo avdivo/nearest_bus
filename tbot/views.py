@@ -65,6 +65,23 @@ def handle_message(message):
     user.parameter.save()
 
 
+@bot.message_handler(commands=['help'])
+def handle_message(message):
+    user = authorize(message.from_user)
+    if not user:
+        # Для ботов
+        raise PermissionDenied
+
+    try:
+        help_text = open(settings.BASE_DIR / 'tbot' / 'help.md', 'r')
+        bot.send_message(message.chat.id, help_text.read(), parse_mode='Markdown')
+    except Exception as e:
+        logger.error('---' * 10)
+        logger.error(f"Произошла ошибка для пользователя {message.from_user.id}: {e}")
+        logger.error(traceback.format_exc())
+        bot.send_message(message.chat.id, "Произошла ошибка, попробуйте снова.")
+
+
 @bot.callback_query_handler(func=lambda call: True)
 def callback_inline(call):
     if call.message:

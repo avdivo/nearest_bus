@@ -192,9 +192,10 @@ class ExeAddBusStop(Executor):
             self.other_fields['start'] = self.key_name  # Сохраняем начальную остановку
 
         if self.stage == 2:
-            # ---------------- 3 этап - запрос имени для сохранения ----------------
+            # ---------------- 3 этап - сохранение маршрута ----------------
             # Находим объекты остановок по названиям и направлению
-            bs_dict = BusStop.get_routers_by_two_busstop(self.other_fields['start'], self.key_name)
+            start_name = self.other_fields['start']
+            bs_dict = BusStop.get_routers_by_two_busstop(start_name, self.key_name)
             try:
                 # Сохраняем id начальной остановки
                 self.other_fields['start'] = bs_dict['start'].external_id
@@ -207,38 +208,28 @@ class ExeAddBusStop(Executor):
                 self.stage = 0
                 return
 
+            # Автосохранение маршрута
+            favorites = json.loads(self.user.parameter.favorites)
+            base_name = f'{start_name} - {self.key_name}'
+            name = base_name
+            i = 1
+            while name in favorites:
+                name = f'{base_name} {str(i)}'
+                i += 1
+
             # Составляем строку для сообщения
             string = (f'На остановке "{bs_dict["start"].name}"\nостанавливаются следующие автобусы:\n' +
                       ', '.join([str(bus.number) for bus in buses]) +
                       f'.\n\nИз них, по выбранному вами маршруту, до остановки "{self.key_name}" идут автобусы:\n' +
-                      ', '.join([str(bus.number) for bus in bs_dict['buses']]) +
-                      '.\n\nВведите имя для сохранения в Мои маршруты. После сохранения вы сможете откорректировать маршрут.')
+                      ', '.join([str(bus.number) for bus in bs_dict['buses']]))
 
             # Отправляем сообщение со списком автобусов и приглашением ввести имя для сохранения
             self.bot.send_message(self.message.chat.id, string)
+            self.bot.send_message(self.message.chat.id, f'Маршрут сохранен в Мои маршруты под именем:\n{name}')
 
             # Сохраняем параметры
             self.other_fields['finish'] = bs_dict['finish'].external_id
             self.other_fields['check'] = [bus.number for bus in bs_dict['buses']]  # Список автобусов которые будут сохранены как выбранные
-            self.kb_wait.clear()
-
-        if self.stage == 3:
-            # ---------------- 4 этап - сохранение ----------------
-            # Должно прийти имя для сохранения, сохраняем новый маршрут с этим именем
-            name = self.message.text
-            pattern = r'[\n\r"\\]'
-            if re.search(pattern, name):
-                self.bot.send_message(self.message.chat.id, 'В новом названии использованы недопустимые символы, '
-                                                            'пожалуйста, введите другое название.')
-                return
-            favorites = json.loads(self.user.parameter.favorites)
-            if name in favorites:
-                self.bot.send_message(self.message.chat.id, 'Маршрут с таким именем уже существует, '
-                                                            'пожалуйста, введите другое название.')
-                return
-
-            if not name:
-                name = f'Маршрут {self.other_fields["start"]} - {self.other_fields["finish"]}'
 
             # Сохраняем маршрут в Избранное (favorites)
             save = json.loads(self.user.parameter.favorites)
@@ -246,9 +237,6 @@ class ExeAddBusStop(Executor):
                           'check': self.other_fields['check']}
             self.user.parameter.favorites = json.dumps(save, ensure_ascii=False)
             self.user.parameter.save()
-
-            # Отправляем сообщение об успешном сохранении
-            self.bot.send_message(self.message.chat.id, f'Маршрут "{name}" сохранен в Мои маршруты.')
 
         self.stage += 1
 
@@ -592,7 +580,7 @@ class MyRouterSetting(Executor):
                 self.other_fields['del'] = 1
                 self.bot.send_message(self.message.chat.id, f'Для удаления маршрута "{self.other_fields["name_rout"]}" '
                                                             'подтвердите действие, нажав повторно кнопку "Удалить маршрут" через '
-                                                            '15 секунд, после того как она перестанет переливаться.')
+                                                            '15 секунд, когда как она перестанет переливаться.')
                 return
 
             favorites = json.loads(self.user.parameter.favorites)
