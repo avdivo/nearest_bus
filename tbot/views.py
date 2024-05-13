@@ -74,7 +74,7 @@ def handle_message(message):
 
     try:
         help_text = open(settings.BASE_DIR / 'tbot' / 'help.md', 'r')
-        bot.send_message(message.chat.id, help_text.read(), parse_mode='Markdown')
+        bot.send_message(message.chat.id, help_text.read(), parse_mode='Markdown', disable_web_page_preview=True)
     except Exception as e:
         logger.error('---' * 10)
         logger.error(f"Произошла ошибка для пользователя {message.from_user.id}: {e}")

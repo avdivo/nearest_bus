@@ -11,7 +11,9 @@ from telebot import types
 from django.utils import timezone
 from django.conf import settings
 
-from schedule.models import BusStop, Schedule, Bus
+from schedule.models import BusStop, Schedule
+from tbot.models import IdsForName
+
 from utils.translation import get_day_string, get_day_number
 
 
@@ -84,6 +86,7 @@ class Executor:
             self.message = bot_object  # Объект сообщения
         else:
             self.kb_id, self.key_name = bot_object.data.split('_')
+            self.key_name = IdsForName.get_name_by_id(self.key_name)  # Получаем имя по идентификатору
             self.message = bot_object.message  # Объект сообщения
         data = dict()
         if action is None:
@@ -130,6 +133,9 @@ class Executor:
         количество клавиш в строке и флаг замены клавиатуры.
         Возвращает: идентификатор клавиатуры. Он фигурирует в названии клавиш: идентификатор_название.
         Выводит клавиатуру в чат.
+        Для идентификации клавиш использует идентификатор, вместо имени, поскольку длинные имена
+        не допустимы в качестве идентификатора кнопки в телеграмме.
+        Идентификаторы хранятся в таблице IdsForName. И возвращаются вместо имен.
         """
         # Генерируем уникальный id для клавиатуры
         characters = string.ascii_letters + string.digits
@@ -146,7 +152,8 @@ class Executor:
         buttons = []
         for name, selected in name_dict.items():
             sel = '✓ ' if selected else ''
-            button = types.InlineKeyboardButton(text=sel+name, callback_data=f'{kd_id}_{name}')
+            id_name = IdsForName.get_id_by_name(name)  # Получаем идентификатор по имени
+            button = types.InlineKeyboardButton(text=sel+name, callback_data=f'{kd_id}_{id_name}')
             buttons.append(button)
 
         # Добавляем кнопки в разметку заданное количество раз в строке
@@ -175,7 +182,7 @@ class ExeAddBusStop(Executor):
             stops = sorted(list(stops))
 
             # Отправляем сообщение с клавиатурой и запоминаем ее id
-            self.kb_wait = [self.keyboard('Выберите остановку отправления:', stops, row=2)]
+            self.kb_wait = [self.keyboard('🚩 🚩 🚩 Выберите остановку отправления:', stops, row=2)]
 
         if self.stage == 1:
             # ---------------- 2 этап - запрос направления ----------------
@@ -188,7 +195,7 @@ class ExeAddBusStop(Executor):
             for_kb = sorted(list(for_kb))
 
             # Отправляем сообщение с клавиатурой
-            self.kb_wait = [self.keyboard('Выберите остановку назначения:', for_kb, row=2)]
+            self.kb_wait = [self.keyboard('🚩 🚩 🚩 Выберите остановку назначения:', for_kb, row=2)]
             self.other_fields['start'] = self.key_name  # Сохраняем начальную остановку
 
         if self.stage == 2:
@@ -203,7 +210,7 @@ class ExeAddBusStop(Executor):
                 buses = bs_dict['start'].get_bus_by_stop()
             except AttributeError:
                 # Если остановка не найдена, то выводим сообщение и завершаем действие
-                self.bot.send_message(self.message.chat.id, 'Возможно между этими остановками нет прямого маршрута. '
+                self.bot.send_message(self.message.chat.id, '⚠️ Возможно между этими остановками нет прямого маршрута. '
                                                             'Попробуйте выбрать другие остановки.')
                 self.stage = 0
                 return
@@ -213,19 +220,20 @@ class ExeAddBusStop(Executor):
             base_name = f'{start_name} - {self.key_name}'
             name = base_name
             i = 1
+            print(favorites, name)
             while name in favorites:
                 name = f'{base_name} {str(i)}'
                 i += 1
 
             # Составляем строку для сообщения
-            string = (f'На остановке "{bs_dict["start"].name}"\nостанавливаются следующие автобусы:\n' +
+            string = (f'🚥 На остановке "{bs_dict["start"].name}"\nостанавливаются следующие автобусы:\n' +
                       ', '.join([str(bus.number) for bus in buses]) +
-                      f'.\n\nИз них, по выбранному вами маршруту, до остановки "{self.key_name}" идут автобусы:\n' +
+                      f'.\n\n🚥 Из них, по выбранному вами маршруту, до остановки "{self.key_name}" идут автобусы:\n' +
                       ', '.join([str(bus.number) for bus in bs_dict['buses']]))
 
             # Отправляем сообщение со списком автобусов и приглашением ввести имя для сохранения
             self.bot.send_message(self.message.chat.id, string)
-            self.bot.send_message(self.message.chat.id, f'Маршрут сохранен в Мои маршруты под именем:\n{name}')
+            self.bot.send_message(self.message.chat.id, f'🚥 Маршрут сохранен в Мои маршруты под именем:\n{name}')
 
             # Сохраняем параметры
             self.other_fields['finish'] = bs_dict['finish'].external_id
@@ -253,9 +261,9 @@ class MyRouter(Executor):
             # Выводим список маршрутов из Избранного
             favorites = json.loads(self.user.parameter.favorites)
             if not favorites:
-                self.bot.send_message(self.message.chat.id, 'У вас нет сохраненных маршрутов.')
+                self.bot.send_message(self.message.chat.id, '⚠️ У вас нет сохраненных маршрутов.')
                 return
-            self.kb_wait = [self.keyboard('Выберите маршрут:', favorites.keys(), row=1)]
+            self.kb_wait = [self.keyboard('🚌 Выберите маршрут:', favorites.keys(), row=1)]
 
         if self.stage == 1:
             # ---------------- 2 этап - вывод расписания ----------------
@@ -344,12 +352,12 @@ class MyRouter(Executor):
 
             # Выводим только count временных отметок для каждого автобуса в режиме По автобусам
             # В режиме По времени выводим только count временных отметок
-            string = f'Маршрут *"{key_name}"*\nот остановки *"{start.name}"*\nна период *{count}*   ({get_day_string(day)})\n\n'
+            string = f'🚌 Маршрут *"{key_name}"*\nот остановки *"{start.name}"*\nна период *{count}*   ({get_day_string(day)})\n\n'
             if not schedule:
                 if count == '24 часа':
                     string += 'Автобусы уже не ходят.\n'
                 else:
-                    string += f'Нет автобусов на период - *{count}*.\n'
+                    string += f'⚠️ Нет автобусов на период - *{count}*.\n'
             if mode == 'По автобусам':
                 for bus, times in schedule.items():
                     string += f'*Автобус №{bus}*  -  {",  ".join(time.strftime("%H:%M") for time in times)}\n\n'
@@ -363,7 +371,7 @@ class MyRouter(Executor):
             self.bot.send_message(self.message.chat.id, string, parse_mode='Markdown')
 
             # Формируем клавиатуру для дополнительных действий
-            self.kb_wait = [self.keyboard(f'Полное расписание на любой день:', week, row=7)]
+            self.kb_wait = [self.keyboard(f'📆 Полное расписание на любой день:', week, row=7)]
         self.stage = 1
 
 
@@ -434,7 +442,7 @@ class MyRouterSetting(Executor):
             # ---------------- 0 этап - запрос маршрута ----------------
             # Выводим список маршрутов из Избранного
             favorites = json.loads(self.user.parameter.favorites)
-            self.kb_wait = [self.keyboard('Редактирование маршрута:', favorites.keys(), row=1)]
+            self.kb_wait = [self.keyboard('⚙️ Редактирование маршрута:', favorites.keys(), row=1)]
 
             self.stage = 1
 
@@ -446,7 +454,7 @@ class MyRouterSetting(Executor):
             self.other_fields['favorites'] = favorites[self.key_name]  # Сохраняем данные о настройках маршрута
 
             # Выводим клавиатуру с действиями
-            self.kb_wait = [self.keyboard(f'Выберите действе для маршрута\n"{self.other_fields["name_rout"]}":',
+            self.kb_wait = [self.keyboard(f'🔧 Выберите действе для маршрута\n"{self.other_fields["name_rout"]}":',
                                           menu.keys(), row=1)]
 
             self.stage = 10
@@ -455,7 +463,7 @@ class MyRouterSetting(Executor):
             # ---------------- 2.0 этап - вывод списка автобусов ----------------
             # Список автобусов представляется с возможностью выбора (галочка)
             buses = self.make_bus_list_by_buss(self.other_fields['favorites']['start'])
-            self.kb_wait = [self.keyboard(f'Выберите автобусы для маршрута\n"{self.other_fields["name_rout"]}":',
+            self.kb_wait = [self.keyboard(f'🚌 Выберите автобусы для маршрута\n"{self.other_fields["name_rout"]}":',
                                           buses, row=3)]
 
             self.stage = 2.1
@@ -471,7 +479,7 @@ class MyRouterSetting(Executor):
 
             # Выводим клавиатуру с заменой предыдущей
             buses = self.make_bus_list_by_buss(self.other_fields['favorites']['start'])
-            self.kb_wait = [self.keyboard(f'Выберите автобусы для маршрута\n"{self.other_fields["name_rout"]}":',
+            self.kb_wait = [self.keyboard(f'🚌 Выберите автобусы для маршрута\n"{self.other_fields["name_rout"]}":',
                                           buses, row=3, replace=True)]
 
             # Сохраняем изменения в Избранном
@@ -486,7 +494,7 @@ class MyRouterSetting(Executor):
                 check = 'По времени'
 
             menu = self.make_checking_dict_by_list(['По времени', 'По автобусам'], [check])
-            self.kb_wait = [self.keyboard(f'Вид расписания для маршрута\n"{self.other_fields["name_rout"]}":',
+            self.kb_wait = [self.keyboard(f'🌄 Вид расписания для маршрута\n"{self.other_fields["name_rout"]}":',
                                           menu, row=1)]
 
             self.stage = 3.1
@@ -495,7 +503,7 @@ class MyRouterSetting(Executor):
             # ---------------- 3.1 этап - записать вид расписания ----------------
             # Реакция на клик по виду расписания
             menu = self.make_checking_dict_by_list(['По времени', 'По автобусам'], [self.key_name])
-            self.kb_wait = [self.keyboard(f'Вид расписания для маршрута\n"{self.other_fields["name_rout"]}":', menu, row=1, replace=True)]
+            self.kb_wait = [self.keyboard(f'🌄 Вид расписания для маршрута\n"{self.other_fields["name_rout"]}":', menu, row=1, replace=True)]
 
             # Сохраняем изменения в Избранном
             self.other_fields['favorites']['view'] = self.key_name
@@ -511,7 +519,7 @@ class MyRouterSetting(Executor):
 
             menu = self.make_checking_dict_by_list(['15 минут', '30 минут', '1 час', '2 часа', '3 часа', '24 часа'], [check])
             self.kb_wait = [
-                self.keyboard(f'За какой промежуток времени начиная от текущего '
+                self.keyboard(f'⏰ За какой промежуток времени начиная от текущего '
                               f'показать автобусы для маршрута\n"{self.other_fields["name_rout"]}":',
                                           menu, row=2)]
 
@@ -533,7 +541,7 @@ class MyRouterSetting(Executor):
             # ---------------- 5 этап - переименование маршрута ----------------
             # Отправляем сообщение с запросом нового имени
             self.bot.send_message(self.message.chat.id,
-                                  f'Введите новое название для маршрута\n"{self.other_fields["name_rout"]}":')
+                                  f'✏️ Введите новое название для маршрута\n"{self.other_fields["name_rout"]}":')
 
             self.stage = 5.1
 
@@ -542,12 +550,12 @@ class MyRouterSetting(Executor):
             # Сохраняем новое имя в Избранном с сохранением порядка
             pattern = r'[\n\r"\\]'
             if re.search(pattern, self.message.text):
-                self.bot.send_message(self.message.chat.id, 'В новом названии использованы недопустимые символы, '
+                self.bot.send_message(self.message.chat.id, '⚠️ В новом названии использованы недопустимые символы, '
                                                             'пожалуйста, введите другое название.')
                 return
             favorites = json.loads(self.user.parameter.favorites)
             if self.message.text in favorites:
-                self.bot.send_message(self.message.chat.id, 'Маршрут с таким именем уже существует, '
+                self.bot.send_message(self.message.chat.id, '⚠️ Маршрут с таким именем уже существует, '
                                                             'пожалуйста, введите другое название.')
                 return
 
@@ -578,7 +586,7 @@ class MyRouterSetting(Executor):
 
             if 'del' not in self.other_fields:
                 self.other_fields['del'] = 1
-                self.bot.send_message(self.message.chat.id, f'Для удаления маршрута "{self.other_fields["name_rout"]}" '
+                self.bot.send_message(self.message.chat.id, f'❗️ Для удаления маршрута "{self.other_fields["name_rout"]}" '
                                                             'подтвердите действие, нажав повторно кнопку "Удалить маршрут" через '
                                                             '15 секунд, когда как она перестанет переливаться.')
                 return
@@ -613,16 +621,16 @@ class ExeMessage(Executor):
             chat_id, text = text.split(' ', 1)
             chat_id = int(chat_id.split('_')[2])
             self.bot.send_message(chat_id, text)
-            ok = 'Сообщение отправлено'
+            ok = '📨 Сообщение отправлено'
         else:
             # Преобразуем строку JSON в список (это id администраторов)
             admin_ids = settings.ADMINS
 
             # Отправляем сообщение каждому администратору
             for admin_id in admin_ids:
-                self.bot.send_message(admin_id, f"Пользователь с ID {user_id} и ID чата {chat_id} отправил сообщение: {text}")
+                self.bot.send_message(admin_id, f"📨 Пользователь с ID {user_id} и ID чата {chat_id} отправил сообщение: {text}")
                 self.bot.send_message(admin_id, f"Answer_to_{chat_id} ")
 
-            ok = "Ваше сообщение отправлено разработчику. Благодарим за обратную связь!"
+            ok = "📨 Ваше сообщение отправлено разработчику. Благодарим за обратную связь!"
 
         self.bot.send_message(self.message.chat.id, ok)
