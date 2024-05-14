@@ -9,8 +9,6 @@
 
 from django.core.exceptions import PermissionDenied
 
-from tbot.models import BotUser
-
 from telebot import types
 
 from tbot.services.executors import Executor, ExeAddBusStop, MyRouter, MyRouterSetting, ExeMessage

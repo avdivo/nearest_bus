@@ -36,6 +36,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 from utils.translation import get_day_string
+from tbot.services.functions import date_now
 
 
 # logger = logging.getLogger('django')
@@ -226,12 +227,10 @@ class Holiday(models.Model):
     def is_today_holiday():
         """Если дата есть в таблице, возвращает день недели которым она будет считаться."""
         # Определяем текущую дату с поправкой на часовой пояс
-        current_timezone = timezone.get_current_timezone()
-        utc_time = timezone.now()  # получаем текущую дату в UTC
-        date_now = utc_time.astimezone(current_timezone).date()  # конвертируем дату в текущий часовой пояс
+        now_date = date_now().date()  # Получаем datetime в текущем часовом поясе
         # Есть ли дата в списке праздников
         try:
-            day = Holiday.objects.get(date=date_now).day
+            day = Holiday.objects.get(date=now_date).day
         except ObjectDoesNotExist:
             day = None
         return day

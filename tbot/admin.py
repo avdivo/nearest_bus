@@ -6,7 +6,7 @@ from .models import BotUser, Parameter, IdsForName
 @admin.register(BotUser)
 class BotUserAdmin(admin.ModelAdmin):
     """Пользователи в Админке"""
-    list_display = ('user_name', 'user_login', 'user_id', 'user_menu')
+    list_display = ('user_name', 'user_login', 'user_id', 'user_menu', 'last_update')
     search_fields = ['user_name', 'user_login', 'user_id']
     list_filter = ('user_menu',)
 

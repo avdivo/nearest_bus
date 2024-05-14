@@ -1,7 +1,7 @@
-import json
 import telebot
 import logging
 import traceback
+
 from django.http import HttpResponse
 from django.core.exceptions import PermissionDenied
 from django.views.decorators.csrf import csrf_exempt
@@ -31,7 +31,6 @@ logger.addHandler(fh)
 def telegram(request):
     # Эндпоинт для получения запросов от Телеграмм
     if request.META['CONTENT_TYPE'] == 'application/json':
-
         json_data = request.body.decode('utf-8')
         update = telebot.types.Update.de_json(json_data)
         bot.process_new_updates([update])
@@ -45,6 +44,7 @@ def telegram(request):
 @bot.message_handler(commands=['start'])
 def greet(message):
     try:
+
         menu(bot, message, 'Главное меню')
     except Exception as e:
         logger.error('---' * 10)

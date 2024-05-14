@@ -10,6 +10,7 @@ class BotUser(models.Model):
     user_login = models.CharField(verbose_name='Логин', max_length=100, default='noname')
     user_id = models.CharField(verbose_name='Идентификатор', max_length=15)
     user_menu = models.CharField(verbose_name='Меню пользователя', max_length=50, default='Главное меню')
+    last_update = models.DateTimeField(verbose_name='Последнее обновление', default=None, blank=True, null=True)
 
     def __str__(self):
         return str(f'{self.user_login}')

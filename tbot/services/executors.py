@@ -8,13 +8,13 @@ import string
 from datetime import datetime, date
 from telebot import types
 
-from django.utils import timezone
 from django.conf import settings
 
 from schedule.models import BusStop, Schedule, Holiday
 from tbot.models import IdsForName
 
 from utils.translation import get_day_string, get_day_number
+from tbot.services.functions import date_now
 
 
 def time_generator(time_marks, start_time, duration) -> list:
@@ -291,9 +291,7 @@ class MyRouter(Executor):
             start = BusStop.objects.get(external_id=start)
 
             # Определяем текущее время с поправкой на часовой пояс
-            current_timezone = timezone.get_current_timezone()
-            utc_time = timezone.now()  # получаем текущее время в UTC
-            time_now = utc_time.astimezone(current_timezone).time()  # конвертируем время в текущий часовой пояс
+            time_now = date_now().time()  # конвертируем время в текущий часовой пояс
 
             # Вид отображения расписания
             mode = favorites[key_name].get('view', 'По времени')
