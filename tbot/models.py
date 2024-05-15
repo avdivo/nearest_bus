@@ -11,6 +11,8 @@ class BotUser(models.Model):
     user_id = models.CharField(verbose_name='Идентификатор', max_length=15)
     user_menu = models.CharField(verbose_name='Меню пользователя', max_length=50, default='Главное меню')
     last_update = models.DateTimeField(verbose_name='Последнее обновление', default=None, blank=True, null=True)
+    action_count = models.IntegerField(verbose_name='Количество всех действий', default=0)
+    schedule_count = models.IntegerField(verbose_name='Количество запросов расписаний', default=0)
 
     def __str__(self):
         return str(f'{self.user_login}')

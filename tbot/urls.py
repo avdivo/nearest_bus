@@ -3,7 +3,7 @@ from django.urls import path
 
 
 urlpatterns = [
-    path('tbot/', telegram, name='tbot'),
+    path('', telegram, name='tbot'),
 ]
 
 

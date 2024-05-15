@@ -32,6 +32,7 @@ def authorize(from_user) -> BotUser:
             user = BotUser.objects.create(user_id=user_id, user_name=first_name, user_login=username)
             user.save()
         user.last_update = date_now()
+        user.action_count += 1
         user.save()
         return user
 
