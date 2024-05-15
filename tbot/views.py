@@ -6,7 +6,9 @@ from django.http import HttpResponse
 from django.core.exceptions import PermissionDenied
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
+from django.db.models import Sum
 
+from .models import BotUser
 from .services.menu import menu
 from .services.functions import authorize
 from .services.executors import ExeAddBusStop, MyRouter, MyRouterSetting
@@ -63,6 +65,26 @@ def handle_message(message):
     # Работает исполнитель в классе ExeMessage
     user.parameter.class_name = 'ExeMessage'
     user.parameter.save()
+
+
+@bot.message_handler(commands=['stat'])
+def handle_message(message):
+    """# Метод, который по команде /stat покажет сумму дейсвий всех пользователей
+     и сумму показов расписания всех пользователей
+    """
+    user = authorize(message.from_user)
+    if not user:
+        # Для ботов
+        raise PermissionDenied
+    # Админ ли спрашивает
+    if user.user_id not in settings.ADMINS:
+        bot.send_message(message.chat.id, "Вы не администратор.")
+        return
+
+    action_count = BotUser.objects.aggregate(Sum('action_count'))['action_count__sum']
+    schedule_count = BotUser.objects.aggregate(Sum('schedule_count'))['schedule_count__sum']
+    bot.send_message(message.chat.id, f"Всего обработано запросов от всех пользователей: {action_count}\n"
+                                     f"Всего показано расписаний для всех пользователей: {schedule_count}")
 
 
 @bot.message_handler(commands=['help'])
