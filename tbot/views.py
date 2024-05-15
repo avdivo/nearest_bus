@@ -77,6 +77,7 @@ def handle_message(message):
         # Для ботов
         raise PermissionDenied
     # Админ ли спрашивает
+    bot.send_message(message.chat.id, f"{user.user_id}   {settings.ADMINS}")
     if user.user_id not in settings.ADMINS:
         bot.send_message(message.chat.id, "Вы не администратор.")
         return
