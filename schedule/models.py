@@ -241,3 +241,5 @@ class Holiday(models.Model):
     class Meta:
         verbose_name = 'Праздник'
         verbose_name_plural = 'Праздники'
+
+
