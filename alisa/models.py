@@ -7,10 +7,12 @@ from tbot.models import BotUser
 
 class AlisaUser(models.Model):
     """Таблица связывает аккаунты Телеграмм бота с устройствами Алисы."""
-    user = models.ForeignKey(BotUser, on_delete=models.CASCADE, verbose_name='Пользователь')
+    user = models.ForeignKey(BotUser, null=True, on_delete=models.SET_NULL, verbose_name='Пользователь')
     application_id = models.CharField(verbose_name='Идентификатор приложения с Алисой', max_length=100)
     parameters = models.TextField(verbose_name='Память приложения в JSON', default='{}')
-    passphrase = models.TextField(verbose_name='Парольная фраза для связи с аккаунтом ТГ', default='')
+    last_update = models.DateTimeField(verbose_name='Последнее обновление', default=None, blank=True, null=True)
+    action_count = models.IntegerField(verbose_name='Количество всех действий', default=0)
+    schedule_count = models.IntegerField(verbose_name='Количество запросов расписаний', default=0)
 
     @ staticmethod
     def authorize(application_id):

@@ -29,6 +29,7 @@ Schedule - расписание
     4. time - время. Значение в формате Time H:M.
 
 """
+import json
 
 from django.db import models
 from django.utils import timezone
@@ -108,6 +109,14 @@ class BusStop(models.Model):
         buses = {order.router.bus for order in orders}
         return buses
 
+    @staticmethod
+    def get_all_bus_stops_names():
+        """Возвращает список имен всех остановок в алфавитном порядке, без повторов."""
+        stops = set()
+        for stop in BusStop.objects.all():
+            stops.add(stop.name)
+        return sorted(list(stops))
+
     def __str__(self):
         word = 'Остановка'
         if self.finish:
@@ -117,6 +126,27 @@ class BusStop(models.Model):
     class Meta:
         verbose_name = 'Остановка'
         verbose_name_plural = 'Остановки'
+
+
+class OptionsForStopNames(models.Model):
+    """Варианты названий остановок"""
+    name = models.CharField(verbose_name='Название', max_length=100)
+    options = models.TextField(verbose_name='Вариант названия (список)', default='[]')
+
+    @staticmethod
+    def get_dict_options_name():
+        table = OptionsForStopNames.objects.all()
+        options = {}
+        for row in table:
+            options[row.name] = json.loads(row.options)
+        return options
+
+    def __str__(self):
+        return str(f'{self.name} {self.options}')
+
+    class Meta:
+        verbose_name = 'Вариант названия автобусной остановки'
+        verbose_name_plural = 'Варианты названий автобусных остановок'
 
 
 class Bus(models.Model):
@@ -241,5 +271,4 @@ class Holiday(models.Model):
     class Meta:
         verbose_name = 'Праздник'
         verbose_name_plural = 'Праздники'
-
 

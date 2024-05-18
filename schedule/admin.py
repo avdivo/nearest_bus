@@ -1,12 +1,19 @@
 from django.contrib import admin
 
-from .models import BusStop, Order, Router, Bus, Schedule, Holiday
+from .models import BusStop, OptionsForStopNames, Order, Router, Bus, Schedule, Holiday
 
 
 @admin.register(BusStop)
 class BusStopAdmin(admin.ModelAdmin):
     """Настройки в Админке"""
     list_display = ('name', 'external_id', 'finish')
+
+
+@admin.register(OptionsForStopNames)
+class OptionsForStopNamesAdmin(admin.ModelAdmin):
+    """Настройки в Админке"""
+    list_display = ('name', 'options')
+    list_editable = ('options',)
 
 
 @admin.register(Order)
