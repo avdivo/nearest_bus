@@ -25,7 +25,7 @@ class AlisaUser(models.Model):
         Словарь со всеми параметрами, если имя не указано;
         None, если запрошенного аттрибута нет в словаре.
         Принимает имя параметра."""
-        addition = json.loads(self.addition, parse_float=str)
+        addition = json.loads(self.parameters, parse_float=str)
         out = None
         if name is None:
             out = addition
@@ -38,23 +38,23 @@ class AlisaUser(models.Model):
         Принимает значение параметра и имя.
         Если имя не указано, то считает что передан словарь и обновляет все параметры.
         """
-        addition = json.loads(self.addition, parse_float=str)
+        addition = json.loads(self.parameters, parse_float=str)
         if name is None:
             addition = value
         else:
             addition.update({name: value})
-        self.addition = json.dumps(addition)
+        self.parameters = json.dumps(addition)
         self.save()
 
     def del_parameters(self, name: str):
         """Удаляет указанный параметр или все, если имя не указано.
         Принимает имя атрибута."""
-        additions = json.loads(self.addition, parse_float=str)
+        additions = json.loads(self.parameters, parse_float=str)
         if name is None:
             additions = {}
         elif name in additions:
             del additions[name]
-        self.addition = json.dumps(additions)
+        self.parameters = json.dumps(additions)
         self.save()
 
     def __str__(self):

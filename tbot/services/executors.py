@@ -70,16 +70,14 @@ def time_generator(time_marks, start_time, duration) -> list:
 def answer_for_alisa(start: str, end: str):
     """Возвращает расписание автобусов по одному маршруту для Алисы на текущее время.
     Принимает начальную и конечную остановки в виде объектов.
-    Возвращает словарь с расписанием в виде {время (str): [автобус1, автобус2]}.
+    Возвращает словарь с расписанием в виде {время (str): [автобус1, автобус2 (str)]}.
     """
     # Находим объекты остановок по названиям и направлению
     bs_dict = BusStop.get_routers_by_two_busstop(start, end)
-    try:
-        # Список автобусов на остановке
-        buses = bs_dict['start'].get_bus_by_stop()
-    except AttributeError:
-        # Если остановка не найдена, то выводим сообщение и завершаем действие
+    if bs_dict['start'] is None:
         raise
+    # Список автобусов на остановке
+    buses = bs_dict['buses']
 
     # Находим объект остановки по id
     start = bs_dict['start']
