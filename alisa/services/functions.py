@@ -9,6 +9,8 @@ def date_now():
     # Определяем текущую дату с поправкой на часовой пояс
     current_timezone = timezone.get_current_timezone()
     utc_time = timezone.now()  # получаем текущую дату в UTC
+    # Удаляем информацию о секундах и микросекундах
+    utc_time = utc_time.replace(second=0, microsecond=0)
     date_now = utc_time.astimezone(current_timezone)  # конвертируем дату в текущий часовой пояс
     return date_now
 

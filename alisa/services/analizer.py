@@ -56,7 +56,7 @@ def find_matching_stop(word, anything_list, options):
     return best_match, best_match_ratio
 
 
-def select_samples_by_phrase(phrase, anything_list, add_dict):
+def select_samples_by_phrase(phrase, anything_list, add_dict) -> list:
     """Ищет и возвращает наиболее подходящие встречаемые в переданном тексте шаблонные фразы
     из списка фраз и расширительного словаря. Пример:
     'Найди автобус от социалистической до мясокомбината' -
@@ -68,15 +68,19 @@ def select_samples_by_phrase(phrase, anything_list, add_dict):
     """
     # Обработка текста, получение токенов
     phrase = text_preparation(phrase)
-    words = phrase.split()
+    words_start = phrase.split()
 
     # Удаляем из не желательные слова
-    delete_words = ['автобус', 'алиса']
-    for delete_word in delete_words:
-        try:
-            words.remove(delete_word)
-        except:
-            pass
+    delete_words = ['автобус', 'алис', 'улиц']
+    words = []
+    for word in words_start:
+        ok = True
+        for delete_word in delete_words:
+            if delete_word in word:
+                ok = False
+        if ok and word not in words:
+            words.append(word)
+
     print(words)
 
     new_phrase = '' # Часть искомой фразы
@@ -102,7 +106,8 @@ def select_samples_by_phrase(phrase, anything_list, add_dict):
             new_phrase += ' ' + word
         elif matching_stops[1] < best_result:
             # Если совпадение ухудшилось, то добавляем найденную фразу в список
-            mem.append(best_stop)  # Этот результат принят
+            if best_stop not in mem:
+                mem.append(best_stop)  # Этот результат принят
             new_phrase = word
             best_result = 0
             best_stop = ''
@@ -111,7 +116,7 @@ def select_samples_by_phrase(phrase, anything_list, add_dict):
                 # Записываем только слова с хорошим совпадением
                 best_result = matching_stops[1]
                 best_stop = matching_stops[0]
-    if best_stop:
+    if best_stop and best_stop not in mem:
         mem.append(best_stop)
 
     return mem

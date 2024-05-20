@@ -70,7 +70,7 @@ def time_generator(time_marks, start_time, duration) -> list:
 def answer_for_alisa(start: str, end: str):
     """Возвращает расписание автобусов по одному маршруту для Алисы на текущее время.
     Принимает начальную и конечную остановки в виде объектов.
-    Возвращает словарь с расписанием в виде {время (str): [автобус1, автобус2 (str)]}.
+    Возвращает словарь с расписанием в виде {время: [автобус1, автобус2]} (объекты).
     """
     # Находим объекты остановок по названиям и направлению
     bs_dict = BusStop.get_routers_by_two_busstop(start, end)
@@ -102,13 +102,13 @@ def answer_for_alisa(start: str, end: str):
         # Сохраняем в словарь
         for time_obj in sch:
             if time_obj.time not in schedule:
-                schedule[time_obj.time] = [bus.number]
+                schedule[time_obj.time] = [bus]
             else:
-                schedule[time_obj.time].append(bus.number)
+                schedule[time_obj.time].append(bus)
     # Сортируем по времени
     schedule = dict(sorted(schedule.items(), key=lambda x: x[0]))
     gen = time_generator(list(schedule), time_now, 1440)
-    schedule = {time.strftime("%H:%M"): schedule[time] for time in gen}
+    schedule = {time: schedule[time] for time in gen}
 
     return schedule
 
