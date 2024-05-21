@@ -43,7 +43,7 @@ class AlisaUser(models.Model):
             addition = value
         else:
             addition.update({name: value})
-        self.parameters = json.dumps(addition)
+        self.parameters = json.dumps(addition, ensure_ascii=False)
         self.save()
 
     def del_parameters(self, name: str):
@@ -54,11 +54,11 @@ class AlisaUser(models.Model):
             additions = {}
         elif name in additions:
             del additions[name]
-        self.parameters = json.dumps(additions)
+        self.parameters = json.dumps(additions, ensure_ascii=False)
         self.save()
 
     def __str__(self):
-        return str(f'{self.user_login}')
+        return str(f'{self.user}')
 
     class Meta:
         verbose_name = 'Пользователь'
