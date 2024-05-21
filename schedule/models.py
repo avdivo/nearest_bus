@@ -88,15 +88,14 @@ class BusStop(models.Model):
 
         # Перебираем маршруты и находим тот, в котором у первой остановки номер по порядку
         # в Order меньше чем у второй остановки. Получаем ее id. Возвращаем объект остановки.
-        #
         start, stop = None, None
         buses = []  # Список автобусов на маршруте между заданными остановками
         for router in common_routers:
-            order_one = Order.objects.get(router=router, bus_stop__name=one)
-            order_two = Order.objects.get(router=router, bus_stop__name=two)
+            order_one = Order.objects.filter(router=router, bus_stop__name=one).first()
+            order_two = Order.objects.filter(router=router, bus_stop__name=two).first()
             if order_one.order_number < order_two.order_number:
                 buses.append(router.bus)  # Маршрут идет в нужном направлении, запоминаем его автобус
-                start = order_one.bus_stop  # Возвращаем объект остановки
+                start = order_one.bus_stop  # Возвращаем объекты остановок
                 stop = order_two.bus_stop
 
         return {'start': start, 'finish': stop, 'buses': buses}
