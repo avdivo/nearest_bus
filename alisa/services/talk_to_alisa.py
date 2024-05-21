@@ -1,12 +1,8 @@
 # Модуль принимает запросы от сервиса Яндекс.Диалоги и возвращает ответы.
 # Реализует функции навыка Слуцкие автобусы.
 
-import re
-import json
-import logging
-from difflib import SequenceMatcher
 import random
-from datetime import datetime, time, date, timedelta
+from datetime import datetime, timedelta
 
 from django.utils import timezone
 from schedule.models import BusStop, OptionsForStopNames
