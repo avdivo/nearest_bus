@@ -12,8 +12,6 @@ from alisa.services.analizer import select_samples_by_phrase
 from tbot.services.executors import answer_for_alisa
 
 
-
-
 def answer_to_alisa(request_body):
     """Функция получает все сообщения от Алисы. Определяет их статус и выполняет
     действия в соответствии с ним.
