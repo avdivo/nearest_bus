@@ -71,7 +71,7 @@ def select_samples_by_phrase(phrase, anything_list, add_dict) -> list:
     words_start = phrase.split()
 
     # Удаляем из не желательные слова
-    delete_words = ['алиса', 'улиц']
+    delete_words = ['алиса', 'улиц', 'номер']
     words = []
     for word in words_start:
         ok = True
@@ -81,7 +81,7 @@ def select_samples_by_phrase(phrase, anything_list, add_dict) -> list:
         if ok and word not in words:
             words.append(word)
 
-    print(words)
+    print(words)  # Что расслышано и не отфильтровано
 
     new_phrase = '' # Часть искомой фразы
     mem = []  # Найденные фразы
