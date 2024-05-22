@@ -1,8 +1,7 @@
 # Модуль для анализа речи, распознавания команд и маршрутов
 
 import re
-from difflib import SequenceMatcher
-
+from Levenshtein import distance
 
 def text_preparation(text):
     """Подготовка текста к анализу.
@@ -47,7 +46,7 @@ def find_matching_stop(word, anything_list, options):
     # Перебор всех сущностей, поиск в них похожих на искомое слов
     stops_list = name_generator(anything_list, options)  # Получаем очередную сущность
     for stop, original_name in stops_list:
-        similarity_ratio = SequenceMatcher(None, word, stop).ratio()  # Сравниваем
+        similarity_ratio = 1 - distance(word.strip(), stop.strip()) / max(len(word.strip()), len(stop.strip()))  # Сравниваем
         if similarity_ratio > best_match_ratio:
             # Выбираем лучший результат
             best_match = original_name
