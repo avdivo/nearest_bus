@@ -128,7 +128,8 @@ def answer_to_alisa(request_body):
     if not out:
         return ('Извиняюсь, я вас не поняла. '
                 'Пожалуйста, повторите или уточните названия остановок.')
-
+    return ' '.join(out)
+"""
     elif len(out) == 1:
         # Это может быть команда или не понятый маршрут
         if out[0] in commands:
@@ -196,3 +197,5 @@ def answer_to_alisa(request_body):
 
     else:
         return (f'Я не смогла понять вашу команду, вот что я услышала {", ".join(out)}. ')
+
+"""
