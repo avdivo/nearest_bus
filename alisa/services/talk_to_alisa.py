@@ -132,6 +132,7 @@ def answer_to_alisa(request_body):
 
     # Получаем текст в чистом виде (цифры - словами)
     words = request_body['request']['original_utterance']
+    print(request_body['request']['nlu']['tokens'])
 
     # Анализ текста
     out = select_samples_by_phrase(words, stops, options)
