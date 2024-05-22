@@ -71,7 +71,7 @@ def select_samples_by_phrase(phrase, anything_list, add_dict) -> list:
     words_start = phrase.split()
 
     # Удаляем из не желательные слова
-    delete_words = ['автобус', 'алиса', 'улиц']
+    delete_words = ['алиса', 'улиц']
     words = []
     for word in words_start:
         ok = True
