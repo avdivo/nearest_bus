@@ -18,7 +18,7 @@ logger.addHandler(handler)
 def alisa(request):
     """Эндпоинт для получения запросов от Алисы."""
     request_body = json.loads(request.body)
-    print(json.dumps(request_body, indent=4, ensure_ascii=False))
+    # print(json.dumps(request_body, indent=4, ensure_ascii=False))
 
     # Если это начало сессии просто приветствие
     new = request_body['session']['new']
