@@ -1,8 +1,13 @@
 # Модуль для анализа речи, распознавания команд и маршрутов
 
 import re
+import logging
 from difflib import SequenceMatcher
 from Levenshtein import distance
+
+
+logger = logging.getLogger('alisa')
+
 
 def text_preparation(text):
     """Подготовка текста к анализу.
@@ -83,6 +88,7 @@ def select_samples_by_phrase(phrase, anything_list, add_dict) -> list:
             words.append(word)
 
     print(words)  # Что расслышано и не отфильтровано
+    logger.warning(f"Запрос к Алисе:\n{' '.join(words)}")
 
     new_phrase = '' # Часть искомой фразы
     mem = []  # Найденные фразы

@@ -19,7 +19,7 @@ def alisa(request):
     """Эндпоинт для получения запросов от Алисы."""
     request_body = json.loads(request.body)
     # print(json.dumps(request_body, indent=4, ensure_ascii=False))
-    logger.info('Hello, i`m Alisa')
+
     # Если это начало сессии просто приветствие
     new = request_body['session']['new']
     if new:
@@ -35,5 +35,8 @@ def alisa(request):
         },
         "version": "1.0"
     }
+
+    # Отправка сообщения в ТГ
+    logger.warning(f'{text}')
 
     return HttpResponse(json.dumps(answer))

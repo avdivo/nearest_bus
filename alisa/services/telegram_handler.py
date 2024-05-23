@@ -5,6 +5,7 @@ from django.conf import settings
 
 
 class Messages(logging.Handler):
+    """Класс для отправки сообщений логгера в ТГ."""
     def __init__(self):
         super().__init__()
         self.admin_ids = settings.ADMINS
@@ -12,6 +13,5 @@ class Messages(logging.Handler):
 
     def emit(self, record):
         log_entry = self.format(record)
-        print(log_entry)
         for admin_id in self.admin_ids:
-            self.bot.send_message(admin_id, f"Answer_to_{log_entry} ")
+            self.bot.send_message(admin_id, log_entry)
