@@ -1,5 +1,6 @@
 # Вспомогательные функции
 import telebot
+import logging
 
 from django.utils import timezone
 
@@ -46,4 +47,6 @@ def main_menu():
     return (telebot.types.ReplyKeyboardMarkup(row_width=2).
             add(*[telebot.types.KeyboardButton(name) for name in args]))
 
-# Функция для вывода в телеграмм 4 Switch-кнопок с цифрами от 1 до 4
+# Логгер для отправки сообщений в телеграм
+
+
