@@ -132,7 +132,6 @@ def answer_to_alisa(request_body):
 
     # Получаем текст в чистом виде (цифры - словами)
     words = request_body['request']['original_utterance']
-    print(request_body['request']['nlu']['tokens'])
 
     # Анализ текста
     out = select_samples_by_phrase(words, stops, options)
@@ -160,7 +159,7 @@ def answer_to_alisa(request_body):
                          'Рада стараться!', 'Вы всегда можете на меня рассчитывать.', 'Было приятно помочь.!',
                          'Ваша признательность – лучшая награда.', 'О, вы так внимательны!', 'С любовью и удовольствием!',
                          'Да все, что угодно, только не забудь назвать своего первенца в честь меня.',
-                         'Для этого я и нужна.', 'Я ценю выше внимание!']
+                         'Для этого я и нужна.', 'Я ценю ваше внимание!']
                 return random.choice(words)
 
             elif out[0] == 'Повтори':
