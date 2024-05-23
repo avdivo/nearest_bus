@@ -12,6 +12,6 @@ class Messages(logging.Handler):
 
     def emit(self, record):
         log_entry = self.format(record)
-
+        print(log_entry)
         for admin_id in self.admin_ids:
             self.bot.send_message(admin_id, f"Answer_to_{log_entry} ")
