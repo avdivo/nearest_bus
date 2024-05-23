@@ -1,5 +1,6 @@
 import telebot
 import logging
+import threading
 
 from django.conf import settings
 
@@ -14,4 +15,4 @@ class Messages(logging.Handler):
     def emit(self, record):
         log_entry = self.format(record)
         for admin_id in self.admin_ids:
-            self.bot.send_message(admin_id, log_entry)
+            threading.Thread(target=self.bot.send_message, args=(admin_id, log_entry)).start()
