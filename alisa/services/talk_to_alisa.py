@@ -1,6 +1,7 @@
 # Модуль принимает запросы от сервиса Яндекс.Диалоги и возвращает ответы.
 # Реализует функции навыка Слуцкие автобусы.
 
+import re
 import random
 from datetime import datetime, timedelta
 
@@ -52,7 +53,7 @@ def answer_to_alisa(request_body):
             minutes_word = 'минуту' if minutes % 10 == 1 and minutes % 100 != 11 else 'минуты' if 1 < minutes % 10 < 5 and (minutes % 100 < 10 or minutes % 100 >= 20) else 'минут'
             insert = f' (через {minutes} {minutes_word})'
         time = time.strftime("%H:%M")  # Время отправления автобуса (str)
-        buses = [bus.number for bus in buses]  # Автобусы на это время (str)
+        buses = [re.sub(r'([a-zA-Zа-яА-Я]+)', r"'\1'", bus.number) for bus in buses]  # Автобусы на это время (str)
         text = f'{time}{insert} - '
         word = 'автобус номер' if len(buses) == 1 else 'автобусы номер'
         text += f'{word} {" ,".join(buses)}.\n'
