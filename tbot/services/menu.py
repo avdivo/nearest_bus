@@ -110,12 +110,20 @@ def menu(bot, message, open_menu=None):
         # В переменной class_name хранится название класса программы,
         # которая выполняется для этого пользователя, создаем объект,
         # одновременно запустится продолжение выполнения программы.
-        print(user.parameter.class_name)
+        # print(user.parameter.class_name)
+
         answer = globals()[user.parameter.class_name](bot, user, message)
 
-        print(f"Ответ программы: {answer}", message.text)
-        return
         # Тут можно обработать необработанные сообщения, если answer is None.
+
+        # print(f"Ответ программы: {answer}", message.text)
+        if answer is None:
+            return
+
+        print(answer, '----')
+
+
+        return
 
     else:
         # Если нет программы, сообщаем об ошибке, такого быть не должно

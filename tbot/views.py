@@ -8,7 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from django.db.models import Sum
 
-from .models import BotUser
+from .models import BotUser, IdsForName
 from .services.menu import menu
 from .services.functions import authorize
 from .services.executors import ExeAddBusStop, MyRouter, MyRouterSetting
@@ -117,9 +117,18 @@ def callback_inline(call):
             if not user:
                 # Для ботов
                 raise PermissionDenied
-            class_name = user.parameter.class_name
+
+            # Если запрос от постоянной клавиатуры, то передаем управление в ее класс
+            # Их работа описана в классе Executor
+            kb_id, key_name = call.data.split('_')  # Получаем id клавиатуры
+            class_name = IdsForName.get_name_by_id(kb_id)  # Получаем имя класса
+            action = True
+            if not class_name:
+                class_name = user.parameter.class_name
+                action = None
+
             if class_name:
-                globals()[class_name](bot, user, call)
+                globals()[class_name](bot, user, call, action=action)
             else:
                 logger.error('---' * 10)
                 logger.error(f"Произошла ошибка для пользователя {call.from_user.id}:")

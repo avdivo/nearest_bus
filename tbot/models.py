@@ -95,10 +95,15 @@ class IdsForName(models.Model):
     def get_name_by_id(id: str):
         """Возвращает имя по идентификатору.
         Принимает идентификатор.
-        Проверяет, если идентификатора нет в таблице, то возвращает ошибку.
+        Проверяет, если идентификатора нет в таблице, то возвращает None.
         Если идентификатор есть в таблице, то возвращает его имя.
         """
-        return IdsForName.objects.get(id=id).name
+        try:
+            name = IdsForName.objects.get(id=id).name
+        except:
+            name = None
+        return name
+
 
     class Meta:
         verbose_name = 'Идентификатор для имени'
