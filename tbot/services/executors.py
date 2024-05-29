@@ -571,7 +571,7 @@ class MyRouterSetting(Executor):
             self.bot.send_message(self.message.chat.id, f'💾 Маршрут "{self.message.text}" сохранен.')
 
             self.stage = 0
-            answer = f'{self.__class__.__name__} - {self.stage}'
+            return f'{self.__class__.__name__} - {self.stage}'
 
         if self.kb_id not in self.kb_wait:
             # Допускаются только запросы от клавиатур, которые ожидаются

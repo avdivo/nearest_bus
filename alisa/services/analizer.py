@@ -2,6 +2,7 @@
 
 import re
 import logging
+from num2words import num2words
 from difflib import SequenceMatcher
 from Levenshtein import distance
 
@@ -17,7 +18,7 @@ def text_preparation(text):
     Возвращает обработанный текст.
     """
     text = text.lower().replace('ё', 'е')
-    text = re.sub(r'\W+ ', '', text)
+    text = re.sub(r'\W+', ' ', text)
     return text
 
 
@@ -76,10 +77,14 @@ def select_samples_by_phrase(phrase, anything_list, add_dict) -> list:
     phrase = text_preparation(phrase)
     words_start = phrase.split()
 
-    # Удаляем из не желательные слова
+    # Удаляем из не желательные слова.
+    # Меняем числа на слова
     delete_words = ['алиса', 'улиц', 'номер']
     words = []
     for word in words_start:
+        # меняем числа на слова
+        if word.isdigit():
+            word = num2words(word, lang='ru')
         ok = True
         for delete_word in delete_words:
             if delete_word in word:
