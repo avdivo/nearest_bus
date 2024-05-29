@@ -13,6 +13,7 @@ from telebot import types
 
 from tbot.services.executors import Executor, ExeAddBusStop, MyRouter, MyRouterSetting, ExeMessage
 from tbot.services.functions import authorize
+from alisa.services.talk_to_alisa import answer_to_alisa
 
 
 def menu(bot, message, open_menu=None):
@@ -117,19 +118,19 @@ def menu(bot, message, open_menu=None):
         # Тут можно обработать необработанные сообщения, если answer is None.
 
         # print(f"Ответ программы: {answer}", message.text)
-        if answer is None:
-            return
+        if not answer:
+            print(message.text)
+            # Телеграм не обработал запрос, передаем его Алисе
+            # При этом произойдет регистрация пользователя в Алисе
+            request_body = {}
+            request_body['session']['application']['application_id'] = message.text
+            request_body['request']['original_utterance'] = \
+                f'tg_{user.user_id}_name_{user.user_name}_login_{user.user_login}'
 
-        print(answer, '----')
-
+            return answer_to_alisa(request_body)  # Возвращаем ответ Алисы
 
         return
-
     else:
         # Если нет программы, сообщаем об ошибке, такого быть не должно
         print(f"Произошла ошибка:")
         bot.send_message(message.chat.id, "Запрос не обработан.")
-
-
-
-

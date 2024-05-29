@@ -14,9 +14,13 @@ from tbot.services.executors import answer_for_alisa
 
 
 def answer_to_alisa(request_body):
-    """Функция получает все сообщения от Алисы. Определяет их статус и выполняет
+    """Функция получает все сообщения от Алисы. Или от ТГ. Определяет их статус и выполняет
     действия в соответствии с ним.
-    Принимает тело запроса от Алисы."""
+    Принимая запрос от ТГ обрабатывает его так же, как от Алисы (не подозревая о подмене),
+    при этом в request_body должны приходить нужные данные:
+    request_body['session']['application']['application_id'] - идентификатор устройства (тля тг свой идентификатор)
+    request_body['request']['original_utterance'] - текст запроса.
+    Принимает тело запроса от Алисы или ТГ."""
     current_timezone = timezone.get_current_timezone()
 
     def datetime_bus(time) -> datetime:
