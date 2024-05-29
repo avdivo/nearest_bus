@@ -117,9 +117,8 @@ def menu(bot, message, open_menu=None):
 
         # Тут можно обработать необработанные сообщения, если answer is None.
 
-        # print(f"Ответ программы: {answer}", message.text)
-        if not answer:
-            print(message.text)
+        print(f"Ответ программы: {answer.answer}", message.text)
+        if answer.answer is None:
             # Телеграм не обработал запрос, передаем его Алисе
             # При этом произойдет регистрация пользователя в Алисе
             request_body = {}
