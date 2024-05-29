@@ -121,12 +121,18 @@ def menu(bot, message, open_menu=None):
         if answer.answer is None:
             # Телеграм не обработал запрос, передаем его Алисе
             # При этом произойдет регистрация пользователя в Алисе
-            request_body = {}
-            request_body['session']['application']['application_id'] = message.text
-            request_body['request']['original_utterance'] = \
-                f'tg_{user.user_id}_name_{user.user_name}_login_{user.user_login}'
-
-            return answer_to_alisa(request_body)  # Возвращаем ответ Алисы
+            request_body = {
+                'session': {
+                    'application': {
+                        'application_id': f'tg_{user.user_id}_name_{user.user_name}_login_{user.user_login}'
+                    }
+                },
+                'request': {
+                    'original_utterance': message.text
+                }
+            }
+            # Возвращаем ответ Алисы в телеграм
+            bot.send_message(message.chat.id, answer_to_alisa(request_body))
 
         return
     else:

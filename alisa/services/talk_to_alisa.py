@@ -143,7 +143,6 @@ def answer_to_alisa(request_body):
 
     if not out:
         return answer()
-
     elif len(out) == 1:
         # Это может быть команда или не понятый маршрут
         if out[0] in commands:
