@@ -4,6 +4,7 @@ from django.urls import path
 
 urlpatterns = [
     path('', alisa, name='alisa'),
+    path('gas/', alisa, name='gas'),
 ]
 
 
