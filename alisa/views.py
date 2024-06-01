@@ -51,29 +51,8 @@ def gas(request):
     """Эндпоинт для получения запросов от Алисы."""
     request_body = json.loads(request.body)
     to_telegram = True  # Выводить логи в Телеграмм
-    # print(json.dumps(request_body, indent=4, ensure_ascii=False))
+    print(json.dumps(request_body, indent=4, ensure_ascii=False))
 
-    # Если это начало сессии просто приветствие
-    new = request_body['session']['new']
-    if new:
-        if request_body['request']['original_utterance'] == 'ping':
-            to_telegram = False
-        text = 'Откуда и куда вы хотите ехать?'
-    else:
-        text = answer_to_alisa(request_body)
-
-    answer = {
-        "response": {
-            "text": text,
-            "tts": text,
-            "end_session": False,
-        },
-        "version": "1.0"
-    }
-
-    # Отправка сообщения в ТГ
-    if to_telegram:
-        logger.warning(f'{text}')
-
-    return HttpResponse(json.dumps(answer))
+    return HttpResponse(True)
+    # return HttpResponse(json.dumps(answer))
 

@@ -335,6 +335,9 @@ class MyRouter(Executor):
             self.stage = 1
             return answer
 
+        if not self.kb_id:
+            return answer  # Тут не обрабатываем запросы не от клавиатуры
+
         if self.stage == 1:
             # ---------------- 2 этап - вывод расписания ----------------
             # Засчитываем пользователю получение расписания
