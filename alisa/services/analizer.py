@@ -4,7 +4,6 @@ import re
 import logging
 from num2words import num2words
 from difflib import SequenceMatcher
-from Levenshtein import distance
 
 
 logger = logging.getLogger('alisa')
