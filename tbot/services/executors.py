@@ -256,7 +256,6 @@ class ExeAddBusStop(Executor):
             # Находим объекты остановок по названиям и направлению
             start_name = self.other_fields['start']
             bs_dict = BusStop.get_routers_by_two_busstop(start_name, self.key_name)
-            print(bs_dict)
             try:
                 # Сохраняем id начальной остановки
                 self.other_fields['start'] = bs_dict['start'].external_id
