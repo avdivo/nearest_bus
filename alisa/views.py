@@ -5,7 +5,7 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from .services.talk_to_alisa import answer_to_alisa
-from .services.telegram_handler import Messages
+from utils.telegram_handler import Messages
 
 
 # Настройка логгера c именем 'alisa' для отправки сообщений в ТГ

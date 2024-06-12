@@ -29,6 +29,7 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 fh.setFormatter(formatter)
 logger.addHandler(fh)
 
+
 @csrf_exempt
 def telegram(request):
     # Эндпоинт для получения запросов от Телеграмм

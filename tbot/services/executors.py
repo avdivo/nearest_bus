@@ -5,6 +5,7 @@ import re
 import json
 import random
 import string
+import logging
 from datetime import datetime, date
 from telebot import types
 
@@ -15,6 +16,9 @@ from tbot.models import IdsForName
 
 from utils.translation import get_day_string, get_day_number
 from tbot.services.functions import date_now
+
+
+logger = logging.getLogger('alisa')
 
 
 def time_generator(time_marks, start_time, duration) -> list:
@@ -282,6 +286,8 @@ class ExeAddBusStop(Executor):
                       ', '.join([str(bus.number) for bus in buses]) +
                       f'.\n\n🚥 Из них, по выбранному вами маршруту, до остановки "{self.key_name}" идут автобусы:\n' +
                       ', '.join([str(bus.number) for bus in bs_dict['buses']]))
+            logger.warning(f'Пользователь {self.user.user_name} {self.user.user_id} добавил маршрут "{base_name}".')
+
 
             # Отправляем сообщение со списком автобусов и приглашением ввести имя для сохранения
             self.bot.send_message(self.message.chat.id, string)
@@ -360,6 +366,8 @@ class MyRouter(Executor):
                 self.other_fields['rout'] = self.key_name
 
             key_name = self.other_fields['rout']
+            logger.warning(f'Пользователь {self.user.user_name} {self.user.user_id} посмотрел маршрут "{key_name}".')
+            print(f'Пользователь {self.user.user_name} {self.user.user_id} посмотрел маршрут "{key_name}".')
             check = favorites[key_name]['check']  # Список автобусов
 
             # Находим объект остановки по id
