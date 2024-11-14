@@ -17,7 +17,6 @@ from tbot.models import IdsForName
 from utils.translation import get_day_string, get_day_number
 from tbot.services.functions import date_now
 
-
 logger = logging.getLogger('alisa')
 
 
@@ -29,6 +28,7 @@ def time_generator(time_marks, start_time, duration) -> list:
     Рассматривая таким образом список закольцованным, а отрезок времени накладывается
     по периметру кольца, возвращая метки, которые накрыты отрезком.
     """
+
     def dif_to_minutes(time1, time2):
         """Разница в минутах между двумя значениями времени в формате datetime.time"""
         # Преобразование в объекты datetime.datetime
@@ -122,6 +122,7 @@ class Executor:
     Устанавливает общие аттрибуты для всех действий при начале,
     восстанавливает их при продолжениях, и имеет метод для сохранения.
     """
+
     def __init__(self, bot, user, bot_object, action=None):
         """
         Пояснения по клавиатурам: они могут быть постоянными и временными.
@@ -207,12 +208,12 @@ class Executor:
         for name, selected in name_dict.items():
             sel = '⚡️ ' if selected else ''
             id_name = IdsForName.get_id_by_name(name)  # Получаем идентификатор по имени
-            button = types.InlineKeyboardButton(text=sel+name, callback_data=f'{kd_id}_{id_name}')
+            button = types.InlineKeyboardButton(text=sel + name, callback_data=f'{kd_id}_{id_name}')
             buttons.append(button)
 
         # Добавляем кнопки в разметку заданное количество раз в строке
         for i in range(0, len(buttons), row):
-            keyboard.add(*buttons[i:i+row])
+            keyboard.add(*buttons[i:i + row])
         if replace:
             self.bot.edit_message_text(chat_id=self.message.chat.id, message_id=self.message.message_id,
                                        text=message, reply_markup=keyboard)
@@ -287,7 +288,6 @@ class ExeAddBusStop(Executor):
                       f'.\n\n🚥 Из них, по выбранному вами маршруту, до остановки "{self.key_name}" идут автобусы:\n' +
                       ', '.join([str(bus.number) for bus in bs_dict['buses']]))
             logger.warning(f'Пользователь {self.user.user_name} {self.user.user_id} добавил маршрут "{base_name}".')
-
 
             # Отправляем сообщение со списком автобусов и приглашением ввести имя для сохранения
             self.bot.send_message(self.message.chat.id, string)
@@ -477,6 +477,7 @@ class MyRouterSetting(Executor):
         - Переименовать маршрут
         - Удалить маршрут
     """
+
     def make_checking_dict_by_list(self, ful_list: list, check_list: list):
         """Создает словарь из полного списка элементов (ключи),
         со значениями True для элементов во втором списке,
@@ -569,7 +570,6 @@ class MyRouterSetting(Executor):
                                                             'пожалуйста, введите другое название.')
                 return f'{self.__class__.__name__} - {self.stage}'
 
-
             favorites = json.loads(self.user.parameter.favorites)
             new_favorites = dict()
             for key, value in favorites.items():
@@ -644,7 +644,8 @@ class MyRouterSetting(Executor):
                     self.key_name = '30 минут'  # По умолчанию
 
             # Реакция на клик по количеству автобусов
-            menu = self.make_checking_dict_by_list(['15 минут', '30 минут', '1 час', '2 часа', '3 часа', '24 часа'], [self.key_name])
+            menu = self.make_checking_dict_by_list(['15 минут', '30 минут', '1 час', '2 часа', '3 часа', '24 часа'],
+                                                   [self.key_name])
             self.kb_wait = [self.keyboard(f'За какой промежуток времени начиная от текущего '
                                           f'показать автобусы для маршрута\n"{self.other_fields["name_rout"]}":',
                                           menu, row=2, replace=True)]
@@ -670,8 +671,9 @@ class MyRouterSetting(Executor):
 
             if 'del' not in self.other_fields:
                 self.other_fields['del'] = 1
-                self.bot.send_message(self.message.chat.id, f'❗️ Для удаления маршрута "{self.other_fields["name_rout"]}" '
-                                                            'подтвердите действие, нажав повторно кнопку "Удалить маршрут"')
+                self.bot.send_message(self.message.chat.id,
+                                      f'❗️ Для удаления маршрута "{self.other_fields["name_rout"]}" '
+                                      'подтвердите действие, нажав повторно кнопку "Удалить маршрут"')
                 return answer
 
             favorites = json.loads(self.user.parameter.favorites)
@@ -713,7 +715,8 @@ class ExeMessage(Executor):
 
             # Отправляем сообщение каждому администратору
             for admin_id in admin_ids:
-                self.bot.send_message(admin_id, f"📨 Пользователь с ID {user_id} и ID чата {chat_id} отправил сообщение: \n{text}")
+                self.bot.send_message(admin_id,
+                                      f"📨 Пользователь с ID {user_id} и ID чата {chat_id} отправил сообщение: \n{text}")
                 self.bot.send_message(admin_id, f"Answer_to_{chat_id} ")
 
             ok = "📨 Ваше сообщение отправлено разработчику. Благодарим за обратную связь!"
