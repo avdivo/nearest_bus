@@ -15,7 +15,7 @@ class BotUser(models.Model):
     schedule_count = models.IntegerField(verbose_name='Количество запросов расписаний', default=0)
 
     def __str__(self):
-        return str(f'{self.user_login}')
+        return str(f'{self.user_name}')
 
     def save(self, *args, **kwargs):
         # Если это новый объект, то создаем связанный объект Parameter
