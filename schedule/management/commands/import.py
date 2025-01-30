@@ -1,7 +1,7 @@
 """Команда заполняет БД данными с сайта
 Миноблавтотранс https://gpmopt.by/mopt/Home/Index/sluck#/routes/bus.
 Расписание подготавливается парсером сайта в файле import_schedule.py на локальной машине
-и сохраняется в файле result.json.
+и сохраняется в файле result1.json.
 Формат файла:
 {
     номер автобуса: {
@@ -49,7 +49,7 @@ clear_all_tables()  # Очистка всех таблиц БД (перед им
 
 # Получение данных из файла
 try:
-    file_final = 'result.json'
+    file_final = 'result1.json'
     if os.path.exists(file_final):
         with open(file_final, "r") as file:
             data = json.load(file)
