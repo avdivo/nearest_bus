@@ -39,6 +39,14 @@ def add_bus_stop(name: str, external_id: str, finish: bool = False):
     Добавляет остановку, если ее еще нет (с таким id) или обновляет.
     Возвращает объект.
     """
+    # Даем одно название 2 остановкам (это когда объединяем остановки
+    # Например Автовокзал и Автовокзал *
+    # Остановки объединяются так-же по id в функции merge_bus_stops из модуля import
+    names = {'Автовокзал': ['Автовокзал', 'Автовокзал *']}
+    for n in names.keys():
+        if name in names[n]:
+            name = n
+
     defaults = {'name': name}
     if finish:
         defaults['finish'] = finish

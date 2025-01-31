@@ -28,7 +28,7 @@ from schedule.services.add_to_models import (add_bus, add_bus_stop, add_final_st
                                              add_router, add_final_stop_to_bus, add_order,
                                              add_time_point, clear_all_tables)
 
-
+# Может потребоваться одно название, см. функцию add_bus_stop из модуля add_to_models
 IDS = {'5629': ['5608', '5629'], '64730':['5461', '64730']}
 def merge_bus_stops(id):
     """Функция для объединения двух остановок в одну.

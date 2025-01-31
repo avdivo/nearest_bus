@@ -34,7 +34,7 @@ logger.handlers = [handler]  # Заменяем обработчики, чтоб
 
 def save_result(result: dict):
     """Сохраняет результат в файл."""
-    with open('result1.json', "w") as file:
+    with open('result.json', "w") as file:
         json.dump(result, file, ensure_ascii=False, indent=4)
 
 
