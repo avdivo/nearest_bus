@@ -49,7 +49,7 @@ clear_all_tables()  # Очистка всех таблиц БД (перед им
 
 # Получение данных из файла
 try:
-    file_final = 'result1.json'
+    file_final = 'result.json'
     if os.path.exists(file_final):
         with open(file_final, "r") as file:
             data = json.load(file)
