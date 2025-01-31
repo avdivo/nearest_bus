@@ -1,12 +1,11 @@
 import logging
+import colorlog
+import re, os, json
+from time import sleep, time
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-import re, os, json
-from time import sleep
-from datetime import time
-import colorlog
 
 
 # Определяем цветовую схему для разных уровней логов
@@ -35,7 +34,7 @@ logger.handlers = [handler]  # Заменяем обработчики, чтоб
 
 def save_result(result: dict):
     """Сохраняет результат в файл."""
-    with open('result.json', "w") as file:
+    with open('result1.json', "w") as file:
         json.dump(result, file, ensure_ascii=False, indent=4)
 
 
@@ -109,6 +108,7 @@ def get_days_and_time():
     """Получаем дни недели и расписание на эти дни.
     Возвращает словарь: {день недели: [расписание],...} для всех дней недели."""
     box = None
+    # sleep(0.1)
     while not box:
         # Дождаться отображения списка дней
         box = driver.find_elements(By.XPATH, f'/html/body/div[2]/div/div[2]/div[4]/div/div[2]/div[2]/div[1]')
@@ -117,11 +117,13 @@ def get_days_and_time():
     # Нажать каждую кнопку пн, вт...
     res = dict()
     for day in days:
+        WebDriverWait(driver, 5).until(EC.element_to_be_clickable(day))
+        day_text = day.text
         if "disabled" not in day.get_attribute("class"):
             day.click()
-            res[day.text] = get_schedule()  # Получаем расписание
+            res[day_text] = get_schedule()  # Получаем расписание
         else:
-            res[day.text] = []
+            res[day_text] = []
     return res
 
 
@@ -158,13 +160,21 @@ def get_direction_and_bus_stop():
         # Перебираем остановки кликаем на каждой для открытия расписания
         out = dict()  # Часть возвращаемого словаря
         while bus_stops - bus_stop_i:
-            bus_stop = driver.find_elements(By.XPATH, f'//*[@id="trip{string[i]}"]/a[{bus_stop_i}]')
-            bus_stop_name = bus_stop[0].text
-            WebDriverWait(driver, 5).until(EC.element_to_be_clickable(bus_stop[0]))
-            bus_stop[0].click()
-            sleep(0.2)
-            bus_stop_id = driver.current_url.split('/')[-2]  # Уникальный номер остановки (id)
-            get = get_days_and_time()  # Вызов функции получения расписаний
+            repeat = False
+            while not repeat:
+                try:
+                    bus_stop = driver.find_elements(By.XPATH, f'//*[@id="trip{string[i]}"]/a[{bus_stop_i}]')
+                    bus_stop_name = bus_stop[0].text
+                    WebDriverWait(driver, 5).until(EC.element_to_be_clickable(bus_stop[0]))
+                    bus_stop[0].click()
+                    # sleep(0.2)
+                    bus_stop_id = driver.current_url.split('/')[-2]  # Уникальный номер остановки (id)
+                    get = get_days_and_time()  # Вызов функции получения расписаний
+                    repeat = True
+                except Exception as e:
+                    logger.warning(f"Ошибка. Повтор.")
+                    repeat = False
+
             bus_stop_i += 1
             out[bus_stop_name] = {'id': bus_stop_id, 'schedule': get}
 
@@ -184,6 +194,7 @@ sleep(2)
 # Получаем содержимое страницы
 page_source = driver.page_source
 
+time_start = time()
 logger.warning(f"Начало получения расписания.")
 
 # Находим номера маршрутов (номера автобусов) и записываем их в список
@@ -194,11 +205,22 @@ while direction_len - i:
     # Читаем найденные автобусы, получаем их номера.
     # Кликаем поочереди даля открытия маршрутов автобуса
     directions = driver.find_elements(By.XPATH, '//*[@id="routeList"]/li[*]/a')
+    print(directions[i].text)
     bus_number = directions[i].text.split()[0]
     if bus_number == '201С' or bus_number == '201C':
-        logger.warning(f"Конец получения расписания")
+
+        elapsed_time = time() - time_start
+        # Разбиваем на часы, минуты и секунды
+        hours, remainder = divmod(elapsed_time, 3600)
+        minutes, seconds = divmod(remainder, 60)
+
+        logger.warning(f"Конец получения расписания. {int(hours)} ч {int(minutes)} мин {int(seconds)} сек ")
         # Это останавливает процесс, чтобы не сканировать пригородные маршруты
         break
+
+    # if bus_number != "6":
+    #     i += 1
+    #     continue
 
     logger.info(f"Автобус {bus_number}")
     # Ожидаем, что конкретный элемент стал кликабельным
@@ -212,4 +234,5 @@ while direction_len - i:
     driver.get(url)  # Возврат к начальной странице и переход к следующему номеру
     i += 1
     save_result(result)  # Сохранение результата
+    sleep(2)
 
