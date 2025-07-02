@@ -14,26 +14,14 @@
 
 import re
 import logging
+import jellyfish
 from num2words import num2words
-# from word2number_ru import w2n
 from rapidfuzz import process, fuzz
 
 logger = logging.getLogger('alisa')
 
-LIMIT = 70  # Порог, при значении ниже которого новое слово для сущности бракуется
-RESOLVE = 85  # Если баллы выше или равны этому значению - сущность признается
-
-
-def remove_similar_words(word_list: list, delete_list: list, threshold=70) -> list:
-    """Удаление из списка слов похожих на слова в списке удаления."""
-    filtered_words = []
-
-    for word in word_list:
-        match, score, _ = process.extractOne(word_list, delete_list, scorer=fuzz.ratio)
-        if score < threshold:  # Если слово недостаточно похоже, оставляем его
-            filtered_words.append(word)
-
-    return filtered_words
+LIMIT = 83  # Порог, при значении ниже которого новое слово для сущности бракуется
+RESOLVE = 95  # Если баллы выше или равны этому значению - сущность признается
 
 
 def text_preparation(text):
@@ -56,6 +44,59 @@ def text_preparation(text):
     return re.sub(r'\b\d+\b', replace_match, text)
 
 
+def remove_similar_words(word_list: list, delete_list: list, threshold=70) -> list:
+    """Удаление из списка слов похожих на слова в списке удаления."""
+    filtered_words = []
+
+    for word in word_list:
+        match, score, _ = process.extractOne(word_list, delete_list, scorer=fuzz.ratio)
+        if score < threshold:  # Если слово недостаточно похоже, оставляем его
+            filtered_words.append(word)
+
+    return filtered_words
+
+
+class Find:
+    """Класс для проверки переданной фразы на соответствие списку сущностей.
+    Словарь сущностей формируется при инициализации класса."""
+
+    def __init__(self, anything_list: list, add_dict: dict):
+        """
+        anything_list: Список сущностей, как в БД. Так их нужно возвращать
+        add_dict: Словарь, где в ключах сущности для которых есть расширенные
+            списки вариантов названий. Эти названия в значениях в списке: {name: [list]}.
+
+        Подготовка словаря из списка и словаря: {name: [list]}.
+        Ключи словаря будут названия объектов как в БД,
+        А значениями списки альтернативных названий, но:
+        в нижнем регистре, ё=е, числа заменены словами, без знаков препинания.
+        """
+        self.alter_dict = {}
+        for word in anything_list:
+            new_list = {text_preparation(word)}
+            if word in add_dict:
+                for item in add_dict[word]:
+                    new_list.add(text_preparation(item))
+            self.alter_dict[word] = new_list
+
+
+    def find_matching_entity(self, phrase: str) -> tuple:
+        """
+        Поиск сущности в переданной фразе.
+        Перебирает словарь списков альтернативных названий, сопоставляет с фразой.
+        Возвращает лучшее совпадение в виде кортежа:
+        (правильное название сущности, какая альтернатива лучшая, процент совпадения)
+        """
+        entity = ('', '', 0)
+        # Перебор всех сущностей в словаре
+        for entity_name, alter_list in self.alter_dict.items():
+            for alter_name in alter_list:
+                score = int(jellyfish.jaro_winkler_similarity(phrase, alter_name) * 100)
+                if score >= entity[2]:
+                    entity = (entity_name, alter_name, score)
+        return entity
+
+
 def select_samples_by_phrase(phrase: str, anything_list: list, add_dict: dict, threshold: int = 90) -> list:
     """Ищет и возвращает наиболее подходящие встречаемые в переданном тексте шаблонные фразы
     из списка фраз и расширительного словаря. Пример:
@@ -63,18 +104,8 @@ def select_samples_by_phrase(phrase: str, anything_list: list, add_dict: dict, t
     в этой фразе должна вернуть ['Социалистическая', 'Мясокомбинат'].
     Возвращает список шаблонных фраз (оригинальных) в порядке встреченном во фразе.
     """
-
-    # Подготовка словаря из списка и словаря
-    # Ключи словаря будут названия объектов как в БД,
-    # А значениями списки альтернативных названий, но:
-    # в нижнем регистре, ё=е, числа заменены словами, без знаков препинания.
-    alter_dict = {}
-    for word in anything_list:
-        new_list = {text_preparation(word)}
-        if word in add_dict:
-            for item in add_dict[word]:
-                new_list.add(text_preparation(item))
-        alter_dict[word] = new_list
+    # Подготовка объекта для сопоставления
+    find = Find(anything_list, add_dict)
 
     # Обработка текста, получение токенов
     phrase = text_preparation(phrase)
@@ -113,8 +144,8 @@ def select_samples_by_phrase(phrase: str, anything_list: list, add_dict: dict, t
     8. Возвращаем сущности out_entities или производим дальнейшую обработку.
     """
 
-    found_entities = {}  # Словарь найденных сущностей {name: name in text}
-    pre_entities = {}  # Вероятная сущность
+    found_entities = []  # Найденные сущности
+    pre_entities = None  # Вероятная сущность
 
     # Это текущая (предполагаемая) сущность выделенная в word
     index = 0  # Указатель на слово во фразе
@@ -124,38 +155,31 @@ def select_samples_by_phrase(phrase: str, anything_list: list, add_dict: dict, t
 
     while index + count <= len(words):
         # Находим лучшее соответствие среди всех сущностей
-        best = 0
-        temp_entities = None
-        for name, alter_list in alter_dict.items():
-            match, score, _ = process.extractOne(' '.join(words[index: index+count]), alter_list, scorer=fuzz.token_sort_ratio)
-            if score >= best:
-                print(' '.join(words[index: index+count]), alter_list, match, score, best)
-                best = score
-                temp_entities = {name: words[index: index+count]}
-        print(pre_entities, best)
-        if best < limit:
+        # (правильное название сущности, какая альтернатива лучшая, процент совпадения)
+        temp_entity = find.find_matching_entity(' '.join(words[index: index + count]))
+        print(f"Для строки |{' '.join(words[index: index + count])}| лучшее совпадение {temp_entity}")
+        if temp_entity[2] < limit:
             # Показатель совпадения с новым словом низкий или ухудшился
             if limit >= RESOLVE:
                 # Найдена новая сущность
-                found_entities.update(pre_entities)
-                pre_entities = {}
-                print("+", found_entities)
+                found_entities.append(pre_entities)
                 index = index + count - 1
                 count = 1
             else:
                 index += 1  # Переходим к следующему слову
+                count = 1
             limit = LIMIT
 
         else:
             # Добавленное слово улучшило показатель совпадения сущности
-            limit = best
-            pre_entities = temp_entities
+            limit = temp_entity[2]
+            pre_entities = temp_entity[0]
             count += 1
 
     # Цикл проверки фразы завершен
     if limit >= RESOLVE:
         # Найдена новая сущность
-        found_entities.update(pre_entities)
+        found_entities.append(pre_entities)
         print("+", found_entities)
 
     """Если найденная сущность имеет после себя число - это может быть адресом, как Тутаринова 12.
@@ -164,10 +188,8 @@ def select_samples_by_phrase(phrase: str, anything_list: list, add_dict: dict, t
     """
     words = remove_similar_words(words, ["номер"])
 
-
     print("Ответ:", found_entities)
-    return list(found_entities.keys())
-
+    return found_entities
 
 # 8 школа дом 146 квартира 55 улица 18 дом автобус 25 едет в 3 школу
 # восьмая школа дом сто сорок шесть квартира пятьдесят пять улица восемнадцать дом автобус двадцать пятый едет в третью школу

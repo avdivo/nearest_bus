@@ -6,7 +6,7 @@ from num2words import num2words
 from difflib import SequenceMatcher
 
 
-logger = logging.getLogger('alisa')
+logger = logging .getLogger('alisa')
 
 
 def text_preparation(text):
