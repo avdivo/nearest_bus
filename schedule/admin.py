@@ -1,6 +1,8 @@
 from django.contrib import admin
 
-from .models import BusStop, OptionsForStopNames, Order, Router, Bus, Schedule, Holiday
+from .models import (BusStop, OptionsForStopNames,
+                     Order, Router, Bus, Schedule,
+                     Holiday, StopGroup)
 
 
 @admin.register(BusStop)
@@ -49,3 +51,8 @@ class HolidayAdmin(admin.ModelAdmin):
     list_display = ('date', 'day', 'name')
     # list_editable = ('name')
 
+
+@admin.register(StopGroup)
+class StopGroupAdmin(admin.ModelAdmin):
+    list_display = ('id', 'list_name')
+    list_editable = ('list_name',)
