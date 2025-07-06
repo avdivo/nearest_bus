@@ -49,10 +49,11 @@ def add_bus_stop(name: str, external_id: str, finish: bool = False):
     # закомментировал по причине что для 6 на Автовокзале ставилось расписание остановки в обратную сторону.
 
     # Переименовал остановку для ясности
-    names = {'Автовокзал (кольцо)': ['Автовокзал *']}
-    for n in names.keys():
-        if name in names[n]:
-            name = n
+    name = name.replace("*", "кольцо")
+    # names = {'Автовокзал кольцо': ['Автовокзал *']}
+    # for n in names.keys():
+    #     if name in names[n]:
+    #         name = n
 
     defaults = {'name': name}
     if finish:

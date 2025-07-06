@@ -10,7 +10,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 from .buses_list import buses
-
+from utils.sorted_buses import sorted_buses, compare_name
 
 # Определяем цветовую схему для разных уровней логов
 log_colors = {
@@ -143,7 +143,8 @@ def get_direction_and_bus_stop(driver):
     for i in range(99):  # Большое число — чтобы пройти по всем секциям, пока не появится исключение
         try:
             # Ждем контейнер и извлекаем текущий заголовок и соответствующий блок ссылок
-            container = wait.until(EC.presence_of_element_located((By.XPATH, "/html/body/div[2]/div/div[2]/div[4]/div")))
+            container = wait.until(
+                EC.presence_of_element_located((By.XPATH, "/html/body/div[2]/div/div[2]/div[4]/div")))
             headings = container.find_elements(By.TAG_NAME, "h4")
             list_groups = container.find_elements(By.CLASS_NAME, "list-group")
 
@@ -157,7 +158,8 @@ def get_direction_and_bus_stop(driver):
 
             for j in range(len(links)):
                 # После возврата нужно пересобрать DOM и найти ту же ссылку заново
-                container = wait.until(EC.presence_of_element_located((By.XPATH, "/html/body/div[2]/div/div[2]/div[4]/div")))
+                container = wait.until(
+                    EC.presence_of_element_located((By.XPATH, "/html/body/div[2]/div/div[2]/div[4]/div")))
                 group = container.find_elements(By.CLASS_NAME, "list-group")[i]
                 links = group.find_elements(By.TAG_NAME, "a")
                 h6 = links[j].find_element(By.TAG_NAME, "h6")
@@ -247,42 +249,6 @@ def save_bus(schedule: dict, number: str, hash_: str, folder: str = "import_sche
     return "Расписание сохранено."
 
 
-def compare_name(a: str, b: str) -> int:
-    """
-    Сравнивает 2 имени для порядка сортировки.
-    :param: a - первый аргумент
-    :param: b - второй аргумент
-    :return: int - 1 (первый больше), 0 (равны), -1 (первый меньше)
-    """
-    # Извлекаем имена из строк
-    name_a = a.split('_')[0]
-    name_b = b.split('_')[0]
-
-    # Разделяем числовую и буквенную части
-    name_a = re.findall(r'\d+|[^\d]+', name_a)
-    name_b = re.findall(r'\d+|[^\d]+', name_b)
-
-    num_a = int(name_a[0])
-    num_b = int(name_b[0])
-
-    alpha_a = name_a[1] if len(name_a) > 1 else ""
-    alpha_b = name_b[1] if len(name_b) > 1 else ""
-
-    # Сравниваем числовые части
-    if num_a > num_b:
-        return 1
-    elif num_a < num_b:
-        return -1
-    else:
-        # Если числовые части равны, сравниваем буквенные
-        if alpha_a > alpha_b:
-            return 1
-        elif alpha_a < alpha_b:
-            return -1
-        else:
-            return 0
-
-
 def merge_json_files(folder: str = "import_schedule/buses", output_filename: str = "result.json"):
     """
     Объединяет все JSON-файлы из указанной папки в один словарь.
@@ -318,7 +284,7 @@ def merge_json_files(folder: str = "import_schedule/buses", output_filename: str
 
     # Сообщаем, для каких автобусов нет файлов-расписаний
     is_absent = list(set(buses) - set(buses_present))
-    is_absent = sorted(is_absent, key=cmp_to_key(compare_name))
+    is_absent = sorted_buses(is_absent)  # Сортировка названий автобусов
     if is_absent:
         print(f"Для автобусов: {', '.join(is_absent)}\nнет расписаний.")
 
@@ -329,4 +295,3 @@ def merge_json_files(folder: str = "import_schedule/buses", output_filename: str
         json.dump(sorted_merged, f, ensure_ascii=False, indent=4)
 
     print("Файл импорта собран:")
-
