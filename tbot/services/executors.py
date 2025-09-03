@@ -113,7 +113,6 @@ def answer_for_alisa(start: str, end: str):
     schedule = dict(sorted(schedule.items(), key=lambda x: x[0]))
     gen = time_generator(list(schedule), time_now, 1440)
     schedule = {time: schedule[time] for time in gen}
-    print('-------------------------------', schedule)
     return schedule
 
 
