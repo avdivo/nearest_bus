@@ -78,13 +78,12 @@ def answer_for_alisa(start: str, end: str):
     """
     # Находим объекты остановок по названиям и направлению
     bs_dict = BusStop.get_routers_by_two_busstop(start, end)
-    print("Не понятно ", bs_dict)
     if bs_dict['start'] is None:
         raise
     # Список автобусов на остановке
     buses = bs_dict['buses']
 
-    # Находим объект остановки по id
+    # Получаем объект
     start = bs_dict['start']
 
     # Текущий день недели (1-7), если дата переопределена в таблице,
@@ -98,9 +97,9 @@ def answer_for_alisa(start: str, end: str):
     # Для вида По времени создаем словарь {время (в datetime): [автобус1, автобус2]}
     schedule = dict()
     for bus in buses:
-        # Находим записи в расписании
+        # Находим записи в расписании для всех остановок старт (их может быть 2)
         sch = Schedule.objects.filter(
-            bus_stop=start, bus=bus, day=day).order_by('time')
+            bus_stop__in=start, bus=bus, day=day).order_by('time')
         if len(sch) == 0:  # Если записей нет, переходим к следующему автобусу
             continue
 
@@ -114,7 +113,7 @@ def answer_for_alisa(start: str, end: str):
     schedule = dict(sorted(schedule.items(), key=lambda x: x[0]))
     gen = time_generator(list(schedule), time_now, 1440)
     schedule = {time: schedule[time] for time in gen}
-
+    print('-------------------------------', schedule)
     return schedule
 
 

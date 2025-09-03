@@ -83,7 +83,7 @@ class BusStop(models.Model):
             json.loads(obj.list_name)
             for obj in StopGroup.objects.all()
         ]
-        print(list_names)
+
         # Если целевая остановка есть в группе, добавляем все остановки группы
         # в список остановок назначения
         target_stops = set([two])
@@ -91,7 +91,6 @@ class BusStop(models.Model):
             if two in list_name:
                 target_stops.update(list_name)
         target_stops = list(target_stops)  # Список остановок назначения (str)
-        print("Что в target_stops:", target_stops)
 
         # Получаем маршруты, которые проходят через указанную остановку отправления
         routers_one = set(Router.objects.filter(
@@ -99,6 +98,7 @@ class BusStop(models.Model):
             Q(end__name=one) |  # остановка - конец маршрута
             Q(orders_for_router__bus_stop__name=one)  # остановка в списке Order
         ).distinct())
+
         # Получаем маршруты, которые проходят через указанные остановки прибытия
         routers_two = set()
         if target_stops:
@@ -120,15 +120,13 @@ class BusStop(models.Model):
         # Находим пересечение маршрутов.
         # Те маршруты которые есть как в отправлении так и в прибытии
         common_routers = list(routers_one.intersection(routers_two))
-        print("------- 1", routers_one, "\n\n")
-        print(len(routers_one))
-        print("------- 2", routers_two, "\n\n")
-        print(len(routers_two))
-        print("------- 3", common_routers, "\n\n")
-        print(len(common_routers))
         # Перебираем маршруты и находим те, в котором у первой остановки номер по порядку
         # в Order меньше чем у второй остановки. Получаем ее id. Возвращаем объект остановки.
-        start, stop = None, None  # Объекты начальной и конечной остановок
+
+        # Есть случаи, когда на целевую остановку идет автобус с 2-х,
+        # расположенных через дорогу (в разные стороны) с одним названием (Чехова, Автобус №7)
+        start = set()  # Объекты начальной остановки, может быть 2
+        stop = None  # Объект конечной остановок
         buses = set()  # Список автобусов на маршруте между заданными остановками
         stops_bus = {}  # Словарь {остановка (obj): {автобусы (obj)}}
         for router in common_routers:
@@ -145,7 +143,7 @@ class BusStop(models.Model):
                 print(router, " -------------------- ",arrival_stop)
 
                 # Если хоть раз сюда попал, остановка отправления будет определена
-                start = order_one.bus_stop  # Получаем объект остановки отправления
+                start.add(order_one.bus_stop)  # Получаем объект остановки отправления
 
                 # Для остановок назначения приоритет имеет та, которая была передана
                 # в функцию, поэтому проверяем наличие ее в маршруте.

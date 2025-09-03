@@ -294,4 +294,4 @@ def merge_json_files(folder: str = "import_schedule/buses", output_filename: str
     with open(os.path.join(".", output_filename), 'w', encoding='utf-8') as f:
         json.dump(sorted_merged, f, ensure_ascii=False, indent=4)
 
-    print("Файл импорта собран:")
+    print("Файл импорта собран.")
