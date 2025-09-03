@@ -69,103 +69,95 @@ class BusStop(models.Model):
 
         return related_stops
 
+    import json
+    from django.db.models import Subquery, OuterRef, F
+
     @staticmethod
-    def get_routers_by_two_busstop(one: str, two: str):
-        """Возвращает информацию по маршрутам проходящим через 2 остановки в указанном порядке.
-        Принимает 2 названия остановок.
-        Возвращает словарь: {'start': объект остановки, 'finish': объект остановки,
-        'buses': список автобусов от 1 ко 2, },
-        "stops": {остановка (obj): {автобусы (obj)}}"""
-        # Получаем списки остановок назначения, которые находятся рядом.
-        # Чтобы учесть маршруты, которые могут идти не на указанную остановку,
-        # а на расположенную рядом.
-        list_names = [
-            json.loads(obj.list_name)
-            for obj in StopGroup.objects.all()
+    def get_routers_by_two_busstop(start_stop_name: str, finish_stop_name: str) -> dict:
+        """
+        Находит маршруты между двумя остановками на основе предоставленного алгоритма.
+        """
+        # 1. Получаем список групп названий остановок
+        stop_groups = [
+            json.loads(group.list_name)
+            for group in StopGroup.objects.all()
         ]
 
-        # Если целевая остановка есть в группе, добавляем все остановки группы
-        # в список остановок назначения
-        target_stops = set([two])
-        for list_name in list_names:
-            if two in list_name:
-                target_stops.update(list_name)
-        target_stops = list(target_stops)  # Список остановок назначения (str)
+        def get_stops_with_groups(stop_name: str) -> list[BusStop]:
+            """Вспомогательная функция для получения списка остановок с учетом групп."""
+            # Остановки, точно совпадающие с названием
+            primary_stops = list(BusStop.objects.filter(name=stop_name))
 
-        # Получаем маршруты, которые проходят через указанную остановку отправления
-        routers_one = set(Router.objects.filter(
-            Q(start__name=one) |  # остановка - начало маршрута
-            Q(end__name=one) |  # остановка - конец маршрута
-            Q(orders_for_router__bus_stop__name=one)  # остановка в списке Order
-        ).distinct())
+            grouped_stop_names = set()
+            for group in stop_groups:
+                if stop_name in group:
+                    for name in group:
+                        grouped_stop_names.add(name)
 
-        # Получаем маршруты, которые проходят через указанные остановки прибытия
-        routers_two = set()
-        if target_stops:
-            # Если эта остановка в группе, добавляем всю группу
-            for stop in target_stops:
-                routers = list(Router.objects.filter(
-                    Q(start__name=stop) |  # остановка - начало маршрута
-                    Q(end__name=stop) |  # остановка - конец маршрута
-                    Q(orders_for_router__bus_stop__name=stop)  # остановка в списке Order
-                ).distinct())
-                routers_two.update(routers)
-        else:
-            routers_two = set(Router.objects.filter(
-                    Q(start__name=two) |  # остановка - начало маршрута
-                    Q(end__name=two) |  # остановка - конец маршрута
-                    Q(orders_for_router__bus_stop__name=two)  # остановка в списке Order
-                ).distinct())
+            # Убираем уже найденные, чтобы не дублировать
+            for stop in primary_stops:
+                grouped_stop_names.discard(stop.name)
 
-        # Находим пересечение маршрутов.
-        # Те маршруты которые есть как в отправлении так и в прибытии
-        common_routers = list(routers_one.intersection(routers_two))
-        # Перебираем маршруты и находим те, в котором у первой остановки номер по порядку
-        # в Order меньше чем у второй остановки. Получаем ее id. Возвращаем объект остановки.
+            grouped_stops = list(BusStop.objects.filter(name__in=list(grouped_stop_names)))
 
-        # Есть случаи, когда на целевую остановку идет автобус с 2-х,
-        # расположенных через дорогу (в разные стороны) с одним названием (Чехова, Автобус №7)
-        start = set()  # Объекты начальной остановки, может быть 2
-        stop = None  # Объект конечной остановок
-        buses = set()  # Список автобусов на маршруте между заданными остановками
-        stops_bus = {}  # Словарь {остановка (obj): {автобусы (obj)}}
-        for router in common_routers:
-            # Порядковые номера остановок на маршруте
-            order_one = Order.objects.filter(router=router, bus_stop__name=one).first()
+            # Возвращаем список, где названные пользователем остановки идут первыми
+            return primary_stops + grouped_stops
 
-            # Для каждой остановки прибытия (str)
-            for arrival_stop in target_stops:
-                # Порядковые номера остановок на маршруте
-                order_two = Order.objects.filter(router=router, bus_stop__name=arrival_stop).first()
-                if order_two is None or order_one.order_number > order_two.order_number:
-                    continue  # Пропускаем маршруты с направлением обратным нужному
+        # 2. Создаем список start_list
+        start_list = get_stops_with_groups(start_stop_name)
 
-                print(router, " -------------------- ",arrival_stop)
+        # 3. Создаем список finish_list
+        finish_list = get_stops_with_groups(finish_stop_name)
 
-                # Если хоть раз сюда попал, остановка отправления будет определена
-                start.add(order_one.bus_stop)  # Получаем объект остановки отправления
+        # 4. Создаем контрольный сет check_router
+        check_router = set()
 
-                # Для остановок назначения приоритет имеет та, которая была передана
-                # в функцию, поэтому проверяем наличие ее в маршруте.
-                bus_stop_obj = order_two.bus_stop  # Получаем объект остановки отправления
-                if two == arrival_stop:
-                    # Получаем объект остановки
-                    stop = bus_stop_obj  # Записываем объект остановки прибытия
+        # 5. Создаем основной словарь result
+        result = {}
 
-                buses.add(router.bus)  # Маршрут идет в нужном направлении, записываем его автобус
-                # Добавляем остановку и маршрут в словарь
-                if bus_stop_obj not in stops_bus:
-                    stops_bus[bus_stop_obj] = set()
-                stops_bus[bus_stop_obj].add(router.bus)
+        # 6. Запускаем цикл по всем остановкам отправления
+        for start in start_list:
+            # 7. Создаем словарь all_finish
+            all_finish = {}
 
-        if start and stop is None:
-            # Если не идентифицирована остановка
-            # прибытия пытаемся подобрать другую
-            stop = max(stops_bus, key=lambda k: len(stops_bus[k]))
+            # 8. Запускаем цикл по всем остановкам прибытия
+            for finish in finish_list:
+                # 9. Создаем список buses_list
+                buses_list = []
 
+                # 10. Находим автобусы с нужным направлением
+                # Создаем подзапросы для получения порядковых номеров
+                start_order_sq = Order.objects.filter(bus_stop=start, router=OuterRef('pk')).values('order_number')
+                finish_order_sq = Order.objects.filter(bus_stop=finish, router=OuterRef('pk')).values('order_number')
 
-        print("Из функции ", {'start': start, 'finish': stop, 'buses': buses, 'stops': stops_bus})
-        return {'start': start, 'finish': stop, 'buses': buses, 'stops': stops_bus}
+                # Находим маршруты, где номер остановки start меньше номера finish
+                valid_routers = Router.objects.annotate(
+                    start_order=Subquery(start_order_sq),
+                    finish_order=Subquery(finish_order_sq)
+                ).filter(
+                    start_order__isnull=False,
+                    finish_order__isnull=False,
+                    start_order__lt=F('finish_order')
+                )
+
+                found_buses = [router.bus for router in valid_routers]
+
+                # 11. Добавляем найденные автобусы в список
+                for bus in found_buses:
+                    if bus not in check_router:
+                        buses_list.append(bus)
+                        check_router.add(bus)
+
+                # 12. Добавляем непустой список автобусов в словарь
+                if buses_list:
+                    all_finish[finish] = buses_list
+
+            # 14. Добавляем непустой словарь в итоговый результат
+            if all_finish:
+                result[start] = all_finish
+
+        # 16. Возвращаем готовый словарь
+        return result
 
     def get_bus_by_stop(self):
         """Возвращает список автобусов, проходящих через остановку.
