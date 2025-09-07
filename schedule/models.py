@@ -32,7 +32,7 @@ Schedule - расписание
 import json
 
 from django.db import models
-from django.db.models import Q
+from django.db.models import Subquery, OuterRef, F
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.validators import MinValueValidator, MaxValueValidator
 
@@ -48,7 +48,7 @@ class BusStop(models.Model):
     name = models.CharField(verbose_name='Название', max_length=100)
     external_id = models.CharField(verbose_name='id Миноблавтотранс', max_length=10, unique=True)  # Поле article WB
     finish = models.BooleanField(verbose_name='Это конечная остановка', default=False)
-    con_to = models.ManyToManyField('self', verbose_name='С этой остановки на какие конечные', null=True)
+    con_to = models.ManyToManyField('self', verbose_name='С этой остановки на какие конечные')
     con_from = models.ManyToManyField('self', verbose_name='На эту остановку с каких конечных')
 
     def get_related_stops(self):
@@ -68,9 +68,6 @@ class BusStop(models.Model):
                 related_stops.add(stop.bus_stop)
 
         return related_stops
-
-    import json
-    from django.db.models import Subquery, OuterRef, F
 
     @staticmethod
     def get_routers_by_two_busstop(start_stop_name: str, finish_stop_name: str) -> dict:
@@ -141,6 +138,7 @@ class BusStop(models.Model):
                 )
 
                 found_buses = [router.bus for router in valid_routers]
+                print(start.external_id, finish.external_id, found_buses)
 
                 # 11. Добавляем найденные автобусы в список
                 for bus in found_buses:
@@ -156,7 +154,8 @@ class BusStop(models.Model):
             if all_finish:
                 result[start] = all_finish
 
-        # 16. Возвращаем готовый словарь
+        # 16. Возвращаем готовый словарь (нет: 13, 14, 14л, 20)
+        print("\n\n-----------------", result)
         return result
 
     def get_bus_by_stop(self):
