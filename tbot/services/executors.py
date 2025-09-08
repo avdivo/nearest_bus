@@ -14,61 +14,62 @@ from django.conf import settings
 from schedule.models import BusStop, Schedule, Holiday
 from tbot.models import IdsForName
 
+from schedule.services.timestamp import answer_by_two_busstop, time_generator
 from utils.translation import get_day_string, get_day_number
 from tbot.services.functions import date_now
 
 logger = logging.getLogger('alisa')
-
-
-def time_generator(time_marks, start_time, duration) -> list:
-    """Генератор временных меток, возвращающий временные метки из списка.
-    Принимает список временных меток, стартовое время и продолжительность в минутах.
-    Возвращает временные метки из списка, начиная со стартового времени, пока не пройдет
-    указанное количество минут. Если время переходит через 00:00, продолжает считать.
-    Рассматривая таким образом список закольцованным, а отрезок времени накладывается
-    по периметру кольца, возвращая метки, которые накрыты отрезком.
-    """
-
-    def dif_to_minutes(time1, time2):
-        """Разница в минутах между двумя значениями времени в формате datetime.time"""
-        # Преобразование в объекты datetime.datetime
-        datetime1 = datetime.combine(date.today(), time1)
-        datetime2 = datetime.combine(date.today(), time2)
-        # Вычисление разницы в минутах
-        difference = datetime1 - datetime2
-        return difference.total_seconds() / 60
-
-    if not time_marks:
-        return []
-    # Находим индекс временной метки, с которой начнем генерацию
-    index = None
-    for time in time_marks:
-        if time >= start_time:
-            index = time_marks.index(time)
-            break
-    index = 0 if index is None else index
-
-    counter = 0  # Счетчик минут
-    time = datetime.strptime('23:59', '%H:%M').time()
-
-    while True:
-        if time_marks[index] > start_time:
-            # Если следующее время больше стартового, то еще не было перехода через 00:00
-            # Добавляем минуты между временами в счетчик
-            counter += dif_to_minutes(time_marks[index], start_time)
-            start_time = time_marks[index]
-        else:
-            # Если следующее время меньше стартового, значит был переход через 00:00
-            # Добавляем минуты между временем и 00:00
-            counter += dif_to_minutes(time, start_time) + 1
-            # Добавляем минуты между 00:00 и новым временем
-            counter += time_marks[index].hour * 60 + time_marks[index].minute
-            start_time = time_marks[index]
-        index = (index + 1) % len(time_marks)  # Переход к следующему времени (закольцованный список)
-        if counter > duration:
-            # Если счетчик превысил продолжительность, то выходим из цикла
-            return
-        yield start_time  # Возвращаем время
+#
+#
+# def time_generator(time_marks, start_time, duration) -> list:
+#     """Генератор временных меток, возвращающий временные метки из списка.
+#     Принимает список временных меток, стартовое время и продолжительность в минутах.
+#     Возвращает временные метки из списка, начиная со стартового времени, пока не пройдет
+#     указанное количество минут. Если время переходит через 00:00, продолжает считать.
+#     Рассматривая таким образом список закольцованным, а отрезок времени накладывается
+#     по периметру кольца, возвращая метки, которые накрыты отрезком.
+#     """
+#
+#     def dif_to_minutes(time1, time2):
+#         """Разница в минутах между двумя значениями времени в формате datetime.time"""
+#         # Преобразование в объекты datetime.datetime
+#         datetime1 = datetime.combine(date.today(), time1)
+#         datetime2 = datetime.combine(date.today(), time2)
+#         # Вычисление разницы в минутах
+#         difference = datetime1 - datetime2
+#         return difference.total_seconds() / 60
+#
+#     if not time_marks:
+#         return []
+#     # Находим индекс временной метки, с которой начнем генерацию
+#     index = None
+#     for time in time_marks:
+#         if time >= start_time:
+#             index = time_marks.index(time)
+#             break
+#     index = 0 if index is None else index
+#
+#     counter = 0  # Счетчик минут
+#     time = datetime.strptime('23:59', '%H:%M').time()
+#
+#     while True:
+#         if time_marks[index] > start_time:
+#             # Если следующее время больше стартового, то еще не было перехода через 00:00
+#             # Добавляем минуты между временами в счетчик
+#             counter += dif_to_minutes(time_marks[index], start_time)
+#             start_time = time_marks[index]
+#         else:
+#             # Если следующее время меньше стартового, значит был переход через 00:00
+#             # Добавляем минуты между временем и 00:00
+#             counter += dif_to_minutes(time, start_time) + 1
+#             # Добавляем минуты между 00:00 и новым временем
+#             counter += time_marks[index].hour * 60 + time_marks[index].minute
+#             start_time = time_marks[index]
+#         index = (index + 1) % len(time_marks)  # Переход к следующему времени (закольцованный список)
+#         if counter > duration:
+#             # Если счетчик превысил продолжительность, то выходим из цикла
+#             return
+#         yield start_time  # Возвращаем время
 
 
 def answer_for_alisa(start: str, end: str):
@@ -77,7 +78,7 @@ def answer_for_alisa(start: str, end: str):
     Возвращает словарь с расписанием в виде {время: [автобус1, автобус2]} (объекты).
     """
     # Находим объекты остановок по названиям и направлению
-    bs_dict = BusStop.get_routers_by_two_busstop(start, end)
+    bs_dict = answer_by_two_busstop(start, end)
     if bs_dict['start'] is None:
         raise
     # Список автобусов на остановке

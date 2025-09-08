@@ -30,6 +30,8 @@ env.read_env(dotenv_path)
 SECRET_KEY = env('SECRET_KEY')
 TOKEN = env('BOT_TOKEN')
 ADMINS = json.loads(env('ADMINS'))
+TELEGRAM_WEBHOOK_HOST = env('TELEGRAM_WEBHOOK_HOST')
+TELEGRAM_WEBHOOK_PATH = env('TELEGRAM_WEBHOOK_PATH', '/schedule/tbot/')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
