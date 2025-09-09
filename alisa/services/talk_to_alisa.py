@@ -18,7 +18,7 @@ def answer_to_alisa(request_body):
     действия в соответствии с ним.
     Принимая запрос от ТГ обрабатывает его так же, как от Алисы (не подозревая о подмене),
     при этом в request_body должны приходить нужные данные:
-    request_body['session']['application']['application_id'] - идентификатор устройства (тля тг свой идентификатор)
+    request_body['session']['application']['application_id'] - идентификатор устройства (для тг свой идентификатор)
     request_body['request']['original_utterance'] - текст запроса.
     Принимает тело запроса от Алисы или ТГ."""
     current_timezone = timezone.get_current_timezone()

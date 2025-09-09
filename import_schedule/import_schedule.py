@@ -1,6 +1,7 @@
 import logging
 import hashlib
 import colorlog
+import functools
 import re, os, json
 from time import sleep, time
 from functools import cmp_to_key
@@ -69,6 +70,20 @@ logger.handlers = [handler]  # Заменяем обработчики, чтоб
 #     with open(file_direction, "w") as file:
 #         json.dump(list(data), file, ensure_ascii=False, indent=4)
 
+def retry_on_exception(max_retries=5):
+    """Декоратор для перезапуска функции в случае ошибки в ней."""
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            for attempt in range(max_retries):
+                try:
+                    return func(*args, **kwargs)
+                except Exception as e:
+                    if attempt == max_retries - 1:
+                        raise  # Пробрасываем последнюю ошибку
+        return wrapper
+    return decorator
+
 
 def get_schedule(driver):
     """Получение расписания.
@@ -100,7 +115,7 @@ def get_schedule(driver):
             schedule.append(f'{hours}:{number[0]}')  # Добавляем время
     return schedule
 
-
+# @retry_on_exception
 def get_days_and_time(driver):
     """Получаем дни недели и расписание на эти дни.
     Возвращает словарь: {день недели: [расписание],...} для всех дней недели."""
@@ -164,14 +179,28 @@ def get_direction_and_bus_stop(driver):
                 links = group.find_elements(By.TAG_NAME, "a")
                 h6 = links[j].find_element(By.TAG_NAME, "h6")
                 name = h6.text.strip()
-                result[heading][name] = {}
-
+                unique_key = f"{name}|{j:03d}"
+                result[heading][unique_key] = {}
                 # print(f"  🔹 Переход к: {name}")
                 links[j].click()
                 bus_stop_id = driver.current_url.split('/')[-2]  # Уникальный номер остановки (id)
-                get = get_days_and_time(driver)  # Вызов функции получения расписаний
-                result[heading][name]["id"] = bus_stop_id
-                result[heading][name]["schedule"] = get
+                # get = get_days_and_time(driver)  # Вызов функции получения расписаний
+
+                for attempt in range(5):
+                    try:
+                        get = get_days_and_time(driver)
+                        break
+                    except Exception:
+                        logger.warning("Ошибка. Повтор.")
+                else:
+                    logger.error("Не удалось получить расписание.")
+                    return {}
+
+                result[heading][unique_key]["id"] = bus_stop_id
+                result[heading][unique_key]["schedule"] = get
+                # print(name, result[heading][unique_key]["id"])
+                # print(result[heading][unique_key]["schedule"])
+                # print(result)
                 driver.back()
 
         except IndexError:
