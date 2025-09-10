@@ -1,9 +1,8 @@
 # Модуль генерирует набор данных для создания ответа
-from datetime import date
-import itertools
 import json
-from datetime import datetime
-from typing import Dict
+import itertools
+from datetime import date, datetime
+from typing import List, Dict, Any
 
 from tbot.services.functions import date_now
 from schedule.models import BusStop, StopGroup, Bus, Router, Order, Schedule, Holiday
@@ -215,11 +214,12 @@ def answer_by_two_busstop(start_stop_name: str, finish_stop_name: str) -> Dict:
             report[start_bus_stop]['buses'].update(bus_info)
 
     for k, v in report.items():
-        print("--- ", k, "\n")
-        print("priority:", v["priority"])
+        print("--- ", k, "\n")  # Название остановки отправления
+        print("priority:", v["priority"])  # Приоритет
         for i, j in v["buses"].items():
-            print(i)
-            print(j, "\n")
+            print(i)  # Автобус
+            print(j, "\n")  # Словарь параметров маршрута
+            # (остановка прибытия и конечные остановки)
 
     # 6 --------------------------------
     # Создаем словарь timestamp с расписанием.
@@ -231,7 +231,13 @@ def answer_by_two_busstop(start_stop_name: str, finish_stop_name: str) -> Dict:
     time_now = date_now().time()
 
     for start_bus_stop, data in report.items():
+        # Разбираем словарь:
+        # Остановка отправления: информация о маршруте (приоритет, словарь автобусов с нее
+        # {автобус, остановка прибытия, конечные})
         for bus, bus_data in data['buses'].items():
+            # Разбираем словарь автобусов
+
+            # Получаем расписание одного автобуса с одной остановки
             schedules = Schedule.objects.filter(
                 bus_stop=start_bus_stop, bus=bus, day=day
             ).order_by('time')
@@ -271,7 +277,7 @@ def answer_by_two_busstop(start_stop_name: str, finish_stop_name: str) -> Dict:
                 timestamp[sch.time].append(schedule_entry)
 
     # 7 --------------------------------
-    # Сортируем и фильтруем `timestamp` по времени.
+    # Сортируем `timestamp` по времени.
     if not timestamp:
         return {}
 
@@ -289,9 +295,6 @@ def answer_by_two_busstop(start_stop_name: str, finish_stop_name: str) -> Dict:
         print("--- ", k.strftime('%-H:%M'), " ---")
         print(v, "\n")
     return timestamp
-
-
-from typing import List, Dict, Any
 
 
 def sort_buses(buses: List[Dict[str, Any]], name: str) -> List[Dict[str, Any]]:
