@@ -10,7 +10,7 @@ from schedule.models import BusStop, OptionsForStopNames
 
 from alisa.services.functions import authorize, date_now
 from alisa.services.analizer import select_samples_by_phrase
-from tbot.services.executors import answer_for_alisa
+from schedule.services.timestamp import answer_by_two_busstop, sort_buses
 
 
 def answer_to_alisa(request_body):
@@ -39,31 +39,69 @@ def answer_to_alisa(request_body):
             bus_datetime += timedelta(days=1)
         return bus_datetime
 
-    def say_one_bus(time, buses):
+    def say_one_bus(time, buses, name_start):
         """Готовит ответ о расписании одного автобуса.
         Принимает время отправления и список автобусов.
-        Возвращает текст ответа."""
+        Возвращает текст ответа.
+        Формат buses в файле
+        "Логика поиска остановок и автобусов на них.txt"
+        """
 
-        # Автобусы, которые уходят менее чем через час кроме времени отправления
+        # Автобусы, которые уходят менее чем через час, кроме времени отправления
         # дополняются информацией о времени до отправления
         bus_datetime = datetime_bus(time)  # Дата и время отправления автобуса
         time_to_go = bus_datetime - date_now()  # Время до отправления автобуса
         seconds = time_to_go.total_seconds()  # Получаем разницу в секундах
         minutes = int(seconds // 60)  # Преобразуем секунды в минуты
 
+        time = time.strftime("%H:%M")  # Время отправления автобуса (str)
         # Формируем текст ответа
         insert = ''
         if minutes < 60:
             minutes_word = 'минуту' if minutes % 10 == 1 and minutes % 100 != 11 else 'минуты' if 1 < minutes % 10 < 5 and (minutes % 100 < 10 or minutes % 100 >= 20) else 'минут'
             insert = f' (через {minutes} {minutes_word})'
-        time = time.strftime("%H:%M")  # Время отправления автобуса (str)
-        buses = [re.sub(r'([a-zA-Zа-яА-Я]+)', r"'\1'", bus.number) for bus in buses]  # Автобусы на это время (str)
-        text = f'{time}{insert} - '
         word = 'автобус номер' if len(buses) == 1 else 'автобусы номер'
-        text += f'{word} {" ,".join(buses)}.\n'
+        text = f'{time}{insert} - {word}: '  # Надцать часов минут
 
-        # Запоминаем дату и время отправления автобуса который назван последним (str)
-        # И время для поиска следующего автобуса (str)
+        # text = hh.mm (через n минут) - автобус номер (автобусы номер)
+
+        buses = sort_buses(buses, name_start)  # Специальная сортировка автобусов
+        # Разбираем имеющиеся автобусы на это время
+        for bus_dict in buses:
+            bus = bus_dict['bus']  # Автобус (str)
+            bus_number = re.sub(r'([a-zA-Zа-яА-Я]+)', r"'\1'", bus.number)
+            modifiers = bus_dict.get('modifier', [])  # Модификатор ответа см. в документации
+            add_text = ''
+
+            # Модификатор есть, меняем ответ
+            if modifiers:
+                if "start_deff" in modifiers:
+                    # Название остановки отправления
+                    # не совпадает с изначально запрошенным
+                    add_text += f'От остановки {bus_dict["start"]}. '
+                if "finish_deff" in modifiers:
+                    # Hазвание остановки прибытия
+                    # не совпадает с изначально запрошенным
+                    add_text += f'На остановку {bus_dict["finish"]}. '
+                if "both" in modifiers:
+                    # Один и тот же автобус может отправляться от
+                    # двух разных остановок с одинаковым названием
+                    if add_text:
+                        add_text += f'В сторону конечной {bus_dict["final_stop_finish"]}. '
+                if "final_stop_one" in modifiers:
+                    # Идет через одну конечную остановку
+                    add_text += f'Через конечную {bus_dict["final_stop_finish"]}. '
+                if "final_stop_two" in modifiers:
+                    # Идет через две конечные остановки
+                    # В текущей реализации не используется
+                    add_text += f'Через конечные {bus_dict["final_stop_finish"]} и {bus_dict["final_stop_start"]}. '
+
+            # Добавляем номер автобуса и модификатор в ответ
+            add_text = f"({add_text})" if add_text else ''
+            text += f'{bus_number} {add_text}/n'
+
+        # Запоминаем дату и время отправления автобуса (str)
+        # для поиска следующего автобуса
         user.set_parameters(bus_datetime.isoformat(), 'datetime')
         user.set_parameters(time, 'time')
 
@@ -72,10 +110,13 @@ def answer_to_alisa(request_body):
     def say_schedule(start, end):
         """Готовит ответ о расписании между двумя остановками.
         Принимает начальную и конечную остановки.
-        Возвращает текст ответа."""
+        Возвращает текст ответа.
+        """
         try:
-            # Расписание автобусов на остановке
-            schedule = answer_for_alisa(start, end)
+            # Расписание автобусов на остановках отправления
+            # Формат возвращаемого словаря в файле
+            # "Логика поиска остановок и автобусов на них.txt"
+            schedule = answer_by_two_busstop(start, end)
         except:
             # Если остановка не найдена, то выводим сообщение и завершаем действие
             return (f'Между остановками {start} и {end} нет прямого автобуса. '
@@ -93,9 +134,9 @@ def answer_to_alisa(request_body):
                 if limit == 0:
                     break
                 limit -= 1
-                text += say_one_bus(time, buses)
+                text += say_one_bus(time, buses, start)
         else:
-            text = f'На данный момент нет информации о расписании между остановками {start} и {end}. '
+            text = f'Нет информации о расписании между остановками {start} и {end}. '
 
         return text
 
@@ -175,11 +216,8 @@ def answer_to_alisa(request_body):
 
             elif out[0] == 'Дальше':
                 if user.get_parameters('time'):
-                    # Имеем словарь {время (str): [автобус1, автобус2]}, ищем в нем уже названное время.
-                    # Переходим к следующему и называем его
-                    # Если автобус уже прошел, называем первый
                     stops = user.get_parameters('stops')
-                    schedule = answer_for_alisa(stops[0], stops[1])  # Расписание автобусов на остановке
+                    schedule = answer_by_two_busstop(stops[0], stops[1])  # Расписание автобусов на остановке
                     time_bus = datetime.fromisoformat(user.get_parameters('datetime'))  # Дата и время отправления автобуса
                     time_now = date_now()  # Текущие дата и время
                     if time_now > time_bus:
@@ -195,7 +233,7 @@ def answer_to_alisa(request_body):
                             index = 0
                         time = times[index]  # Очередное время отправления
 
-                    return say_one_bus(time, schedule[time])  # Вывод сообщения
+                    return say_one_bus(time, schedule[time], stops[0])  # Вывод сообщения
                 else:
                     return 'Пожалуйста, назовите маршрут.'
 

@@ -289,3 +289,52 @@ def answer_by_two_busstop(start_stop_name: str, finish_stop_name: str) -> Dict:
         print("--- ", k.strftime('%-H:%M'), " ---")
         print(v, "\n")
     return timestamp
+
+
+from typing import List, Dict, Any
+
+
+def sort_buses(buses: List[Dict[str, Any]], name: str) -> List[Dict[str, Any]]:
+    """
+    Сортирует список автобусов по трём уровням приоритета:
+
+    1. Автобусы, у которых bus['start'].name совпадает с заданным `name`, идут первыми.
+    2. Внутри каждой группы (совпадающих и остальных):
+       - сначала автобусы без модификаторов (bus['modifier'] пустой)
+       - затем автобусы с модификаторами
+    3. Остальные автобусы сортируются по bus['start'].id (по возрастанию)
+
+    :param buses: Список словарей, каждый из которых описывает автобус и его маршрут.
+    :param name: Название остановки, которая имеет приоритет в сортировке.
+    :return: Отсортированный список словарей.
+    """
+
+    def sort_key(bus: Dict[str, Any]) -> tuple:
+        """
+        Генерирует ключ сортировки для каждого автобуса.
+
+        :param bus: Словарь с данными автобуса.
+        :return: Кортеж (priority, start_id), где:
+                 - priority: целое число от 0 до 3, определяющее порядок:
+                     0 — приоритетная остановка + без модификатора
+                     1 — приоритетная остановка + с модификатором
+                     2 — остальные + без модификатора
+                     3 — остальные + с модификатором
+                 - start_id: ID остановки, используется для сортировки остальных
+        """
+        is_named = bus['start'].name == name
+        has_modifier = bool(bus.get('modifier'))
+        start_id = bus['start'].id
+
+        if is_named and not has_modifier:
+            priority = 0
+        elif is_named and has_modifier:
+            priority = 1
+        elif not is_named and not has_modifier:
+            priority = 2
+        else:
+            priority = 3
+
+        return (priority, start_id)
+
+    return sorted(buses, key=sort_key)
