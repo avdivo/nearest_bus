@@ -11,7 +11,7 @@ from telebot import types
 
 from django.conf import settings
 
-from schedule.models import BusStop, Schedule, Holiday
+from schedule.models import BusStop, Schedule, Holiday, StopGroup
 from tbot.models import IdsForName
 
 from schedule.services.timestamp import answer_by_two_busstop, time_generator
@@ -146,10 +146,14 @@ class ExeAddBusStop(Executor):
 
         if run and self.stage == 1:
             # ---------------- 2 этап - запрос направления ----------------
-            # Находим остановку по названию
-            bus_stop = BusStop.objects.filter(name=self.key_name)
+            # Находим связанные с данной остановки (по названию или через группу)
+            bus_stop_name = StopGroup.get_group_by_stop_name(self.key_name)  # Сначала названия
+            bus_stop = list(BusStop.objects.filter(name__in=bus_stop_name))  # Теперь объекты
+
+            # Собираем все множество остановок (куда можно поехать),
+            # связанных с данными всеми маршрутами
             for_kb = set()
-            for stop in bus_stop:  # Остановка с 1 названием может быть 2 (в разных направлениях)
+            for stop in bus_stop:
                 related_stops = stop.get_related_stops()  # Получаем связанные остановки
                 for_kb.update([one.name for one in related_stops])  # Добавляем в множество их названия
             for_kb = sorted(list(for_kb))

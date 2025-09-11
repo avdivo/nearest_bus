@@ -1,12 +1,11 @@
 # Модуль генерирует набор данных для создания ответа
 from datetime import date
 import itertools
-import json
 from datetime import datetime
 from typing import Dict
 
 from tbot.services.functions import date_now
-from schedule.models import BusStop, StopGroup, Bus, Router, Order, Schedule, Holiday
+from schedule.models import BusStop, Bus, Router, Order, Schedule, Holiday, StopGroup
 
 
 def time_generator(time_marks, start_time, duration) -> list:
@@ -76,34 +75,13 @@ def answer_by_two_busstop(start_stop_name: str, finish_stop_name: str) -> Dict:
     # 1 --------------------------------
     # Формируем группы остановок. Логика полностью переписана в соответствии
     # с реальной структурой модели StopGroup (JSON-поле list_name).
-    start_list_set = {start_stop_name}
-    finish_list_set = {finish_stop_name}
-
-    all_groups = StopGroup.objects.all()
-    for group in all_groups:
-        try:
-            # Загружаем список названий из JSON-поля
-            stop_names_in_group = json.loads(group.list_name)
-            if not isinstance(stop_names_in_group, list):
-                continue  # Пропускаем, если формат не является списком
-
-            # Проверяем для начальной и конечной остановок
-            if start_stop_name in stop_names_in_group:
-                for name in stop_names_in_group:
-                    start_list_set.add(name)
-
-            if finish_stop_name in stop_names_in_group:
-                for name in stop_names_in_group:
-                    finish_list_set.add(name)
-
-        except json.JSONDecodeError:
-            # Пропускаем группы с некорректным JSON
-            continue
+    start_list = StopGroup.get_group_by_stop_name(start_stop_name)  # Получаем остановки из групп
+    finish_list = StopGroup.get_group_by_stop_name(finish_stop_name)  # Получаем остановки из групп
 
     # 2 --------------------------------
     # Получаем объекты BusStop для всех найденных названий.
-    start_objects = list(BusStop.objects.filter(name__in=start_list_set))
-    finish_objects = list(BusStop.objects.filter(name__in=finish_list_set))
+    start_objects = list(BusStop.objects.filter(name__in=start_list))
+    finish_objects = list(BusStop.objects.filter(name__in=finish_list))
 
     # print(start_objects)
     # print(finish_objects)

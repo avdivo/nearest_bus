@@ -34,6 +34,7 @@ import itertools
 from typing import Dict
 from django.db import models
 from datetime import datetime
+from typing import List
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.validators import MinValueValidator, MaxValueValidator
 
@@ -254,3 +255,31 @@ class StopGroup(models.Model):
     class Meta:
         verbose_name = 'Группа остановок назначения'
         verbose_name_plural = 'Группы остановок назначения'
+
+    @staticmethod
+    def get_group_by_stop_name(stop_name: str) -> List[str]:
+        """
+        Возвращает список названий остановок из групп,
+        в которые входит данная остановка.
+        Эта остановка будет первой в списке.
+        """
+        all_groups = StopGroup.objects.all()  # Получаем все группы остановок
+        stops_set = set()  # Список для накопления названий остановок
+        for group in all_groups:
+            try:
+                # Загружаем список названий из JSON-поля
+                stop_names_in_group = json.loads(group.list_name)
+                if not isinstance(stop_names_in_group, list):
+                    continue  # Пропускаем, если формат не является списком
+
+                # Проверяем вхождение названия в группу
+                if stop_name in stop_names_in_group:
+                    for name in stop_names_in_group:
+                        stops_set.add(name)
+
+            except json.JSONDecodeError:
+                # Пропускаем группы с некорректным JSON
+                continue
+
+        return [stop_name] + list(stops_set - {stop_name})
+
