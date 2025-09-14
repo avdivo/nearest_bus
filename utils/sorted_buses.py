@@ -37,6 +37,6 @@ def compare_name(a: str, b: str) -> int:
         else:
             return 0
 
-def sorted_buses(buses: list) -> list:
+def sorted_buses(buses: list or set) -> list:
     """Сортировка списка автобусов как надо."""
     return sorted(buses, key=cmp_to_key(compare_name))

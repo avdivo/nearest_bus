@@ -1,8 +1,9 @@
 # Модуль генерирует набор данных для создания ответа
-from datetime import date
+import re
 import itertools
+from datetime import date
 from datetime import datetime
-from typing import Dict
+from typing import Dict, List, Any
 
 from tbot.services.functions import date_now
 from schedule.models import BusStop, Bus, Router, Order, Schedule, Holiday, StopGroup
@@ -59,19 +60,16 @@ def time_generator(time_marks, start_time, duration) -> list:
         yield start_time  # Возвращаем время
 
 
-def answer_by_two_busstop(start_stop_name: str, finish_stop_name: str) -> Dict:
+def route_analysis(start_stop_name: str, finish_stop_name: str) -> List:
+    """Анализ маршрутов определение приоритетов маршрутов.
+    Находит все автобусы, которые идут от каждой остановки
+    отправления к каждой остановке прибытия. Определяет наиболее
+    релевантные автобусы, для каждого случая определяет приоритет -
+    т.е. удобство добраться этим автобусом.
     """
-    Находит оптимальные маршруты автобусов между двумя остановками на основе их названий.
-    Описание в файле "Логика поиска остановок и автобусов на них.txt"
-
-    Args:
-        start_stop_name: Название остановки отправления.
-        finish_stop_name: Название остановки прибытия.
-
-    Returns:
-        Словарь, где ключи - время отправления, а значения - список
-        вариантов маршрута на это время.
-    """
+    # 0 --------------------------------
+    # Получаем все остановки из базы данных.
+    all_stops = BusStop.get_all_bus_stops_names()
     # 1 --------------------------------
     # Формируем группы остановок. Логика полностью переписана в соответствии
     # с реальной структурой модели StopGroup (JSON-поле list_name).
@@ -162,6 +160,24 @@ def answer_by_two_busstop(start_stop_name: str, finish_stop_name: str) -> Dict:
 
     # for k in found_routes:
     #     print(k)
+    return found_routes
+
+
+def answer_by_two_busstop(start_stop_name: str, finish_stop_name: str) -> Dict:
+    """
+    Находит оптимальные маршруты автобусов между двумя остановками на основе их названий.
+    Описание в файле "Логика поиска остановок и автобусов на них.txt"
+
+    Args:
+        start_stop_name: Название остановки отправления.
+        finish_stop_name: Название остановки прибытия.
+
+    Returns:
+        Словарь, где ключи - время отправления, а значения - список
+        вариантов маршрута на это время.
+    """
+    # Проводим анализ маршрутов
+    found_routes = route_analysis(start_stop_name, finish_stop_name)
 
     # 5 --------------------------------
     # Очищаем `found_routes`, оставляя только наивысший приоритет.
@@ -192,12 +208,12 @@ def answer_by_two_busstop(start_stop_name: str, finish_stop_name: str) -> Dict:
         else:
             report[start_bus_stop]['buses'].update(bus_info)
 
-    for k, v in report.items():
-        print("--- ", k, "\n")
-        print("priority:", v["priority"])
-        for i, j in v["buses"].items():
-            print(i)
-            print(j, "\n")
+    # for k, v in report.items():
+    #     print("--- ", k, "\n")
+    #     print("priority:", v["priority"])
+    #     for i, j in v["buses"].items():
+    #         print(i)
+    #         print(j, "\n")
 
     # 6 --------------------------------
     # Создаем словарь timestamp с расписанием.
@@ -208,8 +224,14 @@ def answer_by_two_busstop(start_stop_name: str, finish_stop_name: str) -> Dict:
     day = day if day else datetime.now().isoweekday()
     time_now = date_now().time()
 
+    # Для остановки отправления и другой информации по маршруту:
+    # приоритет, автобусы с этой остановки, куда пребывает каждый,
+    # конечные для каждого
     for start_bus_stop, data in report.items():
+        # Для автобуса и информации по нему
         for bus, bus_data in data['buses'].items():
+            # Получаем расписание автобуса на остановке
+            # отсортированное по времени
             schedules = Schedule.objects.filter(
                 bus_stop=start_bus_stop, bus=bus, day=day
             ).order_by('time')
@@ -217,6 +239,7 @@ def answer_by_two_busstop(start_stop_name: str, finish_stop_name: str) -> Dict:
             if not schedules:
                 continue
 
+            # Вычисляем модификатор
             for sch in schedules:
                 modifiers = []
                 if start_bus_stop.name != start_stop_name:
@@ -236,14 +259,15 @@ def answer_by_two_busstop(start_stop_name: str, finish_stop_name: str) -> Dict:
                             break
 
                 schedule_entry = {
-                    "bus": bus,
-                    "start": start_bus_stop,
-                    "finish": bus_data['finish'],
-                    "modifier": list(set(modifiers)),
-                    "final_stop_start": bus_data['final_stop_start'],
+                    "bus": bus,  # Автобус
+                    "start": start_bus_stop,  # С какой остановки ехать
+                    "finish": bus_data['finish'],  # На какой остановке выходить
+                    "modifier": list(set(modifiers)),  # Модивикатор
+                    "final_stop_start": bus_data['final_stop_start'],  # Конечные
                     "final_stop_finish": bus_data['final_stop_finish'],
                 }
 
+                # Добавляем новую временную метку с информацией по автобусу
                 if sch.time not in timestamp:
                     timestamp[sch.time] = []
                 timestamp[sch.time].append(schedule_entry)
@@ -253,6 +277,7 @@ def answer_by_two_busstop(start_stop_name: str, finish_stop_name: str) -> Dict:
     if not timestamp:
         return {}
 
+    # Сортируем по времени
     timestamp = dict(sorted(timestamp.items(), key=lambda x: x[0]))
 
     try:
@@ -263,13 +288,10 @@ def answer_by_two_busstop(start_stop_name: str, finish_stop_name: str) -> Dict:
 
     # 8 --------------------------------
     # Возвращаем словарь timestamp
-    for k, v in timestamp.items():
-        print("--- ", k.strftime('%-H:%M'), " ---")
-        print(v, "\n")
+    # for k, v in timestamp.items():
+    #     print("--- ", k.strftime('%-H:%M'), " ---")
+    #     print(v, "\n")
     return timestamp
-
-
-from typing import List, Dict, Any
 
 
 def sort_buses(buses: List[Dict[str, Any]], name: str) -> List[Dict[str, Any]]:
@@ -316,3 +338,53 @@ def sort_buses(buses: List[Dict[str, Any]], name: str) -> List[Dict[str, Any]]:
         return (priority, start_id)
 
     return sorted(buses, key=sort_key)
+
+
+def preparing_bus_list(buses, name_start) -> str:
+    """ Принимает список автобусов с дополнительными параметрами
+    и названием остановки, автобусы с которой нужно поставить первыми.
+
+    Готовит текст для одной строки ответа:
+    автобусы через запятую с описанием (если нужно) для каждого.
+
+    Возвращает текст ответа со списком автобусов (без времени)
+    """
+    text = ""
+    buses = sort_buses(buses, name_start)  # Специальная сортировка автобусов
+    # Разбираем имеющиеся автобусы на это время
+    for bus_dict in buses:
+        bus = bus_dict['bus']  # Автобус (str)
+        bus_number = re.sub(r'([a-zA-Zа-яА-Я]+)', r"'\1'", bus.number)
+        modifiers = bus_dict.get('modifier', [])  # Модификатор ответа см. в документации
+        add_text = ''
+
+        # Модификатор есть, меняем ответ
+        if modifiers:
+            if "start_deff" in modifiers:
+                # Название остановки отправления
+                # не совпадает с изначально запрошенным
+                add_text += f'От остановки {bus_dict["start"].name}. '
+            if "both" in modifiers:
+                # Один и тот же автобус может отправляться от
+                # двух разных остановок с одинаковым названием
+                if not add_text:
+                    add_text += f'От остановки {bus_dict["start"].name}. '
+                add_text += f'Которая в сторону конечной {bus_dict["final_stop_finish"].name}. '
+            if "finish_deff" in modifiers:
+                # Hазвание остановки прибытия
+                # не совпадает с изначально запрошенным
+                add_text += f'На остановку {bus_dict["finish"].name}. '
+            if "final_stop_one" in modifiers:
+                # Идет через одну конечную остановку
+                add_text += f'Через конечную {bus_dict["final_stop_finish"].name}. '
+            if "final_stop_two" in modifiers:
+                # Идет через две конечные остановки
+                # В текущей реализации не используется
+                add_text += (f'Через конечные {bus_dict["final_stop_finish"].name} '
+                             f'и {bus_dict["final_stop_start"].name}. ')
+
+        # Добавляем номер автобуса и модификатор в ответ
+        add_text = f"({add_text})" if add_text else ''
+        text += f'Автобус №{bus_number} {add_text}\n'
+
+    return text

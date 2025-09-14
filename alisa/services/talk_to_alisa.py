@@ -10,7 +10,7 @@ from schedule.models import BusStop, OptionsForStopNames
 
 from alisa.services.functions import authorize, date_now
 from alisa.services.analizer import select_samples_by_phrase
-from schedule.services.timestamp import answer_by_two_busstop, sort_buses
+from schedule.services.timestamp import answer_by_two_busstop, preparing_bus_list
 
 
 def answer_to_alisa(request_body):
@@ -41,7 +41,8 @@ def answer_to_alisa(request_body):
 
     def say_one_bus(time, buses, name_start):
         """Готовит ответ о расписании одного автобуса.
-        Принимает время отправления и список автобусов.
+        Принимает время отправления, список автобусов
+        и название остановки отправления.
         Возвращает текст ответа.
         Формат buses в файле
         "Логика поиска остановок и автобусов на них.txt"
@@ -65,42 +66,8 @@ def answer_to_alisa(request_body):
 
         # text = hh.mm (через n минут) - автобус номер (автобусы номер)
 
-        buses = sort_buses(buses, name_start)  # Специальная сортировка автобусов
-        # Разбираем имеющиеся автобусы на это время
-        for bus_dict in buses:
-            bus = bus_dict['bus']  # Автобус (str)
-            bus_number = re.sub(r'([a-zA-Zа-яА-Я]+)', r"'\1'", bus.number)
-            modifiers = bus_dict.get('modifier', [])  # Модификатор ответа см. в документации
-            add_text = ''
-
-            # Модификатор есть, меняем ответ
-            if modifiers:
-                if "start_deff" in modifiers:
-                    # Название остановки отправления
-                    # не совпадает с изначально запрошенным
-                    add_text += f'От остановки {bus_dict["start"].name}. '
-                if "both" in modifiers:
-                    # Один и тот же автобус может отправляться от
-                    # двух разных остановок с одинаковым названием
-                    if not add_text:
-                        add_text += f'От остановки {bus_dict["start"].name}. '
-                    add_text += f'Которая в сторону конечной {bus_dict["final_stop_finish"].name}. '
-                if "finish_deff" in modifiers:
-                    # Hазвание остановки прибытия
-                    # не совпадает с изначально запрошенным
-                    add_text += f'На остановку {bus_dict["finish"].name}. '
-                if "final_stop_one" in modifiers:
-                    # Идет через одну конечную остановку
-                    add_text += f'Через конечную {bus_dict["final_stop_finish"].name}. '
-                if "final_stop_two" in modifiers:
-                    # Идет через две конечные остановки
-                    # В текущей реализации не используется
-                    add_text += (f'Через конечные {bus_dict["final_stop_finish"].name} '
-                                 f'и {bus_dict["final_stop_start"].name}. ')
-
-            # Добавляем номер автобуса и модификатор в ответ
-            add_text = f"({add_text})" if add_text else ''
-            text += f'{bus_number} {add_text}\n'
+        # Подготовка списка автобусов
+        text += preparing_bus_list(buses, name_start)
 
         # Запоминаем дату и время отправления автобуса (str)
         # для поиска следующего автобуса

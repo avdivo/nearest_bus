@@ -70,21 +70,6 @@ logger.handlers = [handler]  # Заменяем обработчики, чтоб
 #     with open(file_direction, "w") as file:
 #         json.dump(list(data), file, ensure_ascii=False, indent=4)
 
-def retry_on_exception(max_retries=5):
-    """Декоратор для перезапуска функции в случае ошибки в ней."""
-    def decorator(func):
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            for attempt in range(max_retries):
-                try:
-                    return func(*args, **kwargs)
-                except Exception as e:
-                    if attempt == max_retries - 1:
-                        raise  # Пробрасываем последнюю ошибку
-        return wrapper
-    return decorator
-
-
 def get_schedule(driver):
     """Получение расписания.
     Возвращает список с текстовым расписанием"""

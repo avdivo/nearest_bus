@@ -33,11 +33,13 @@ import json
 import itertools
 from typing import Dict
 from django.db import models
+from functools import cmp_to_key
 from datetime import datetime
 from typing import List
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.validators import MinValueValidator, MaxValueValidator
 
+from utils.sorted_buses import compare_name
 from utils.translation import get_day_string
 from tbot.services.functions import date_now
 
@@ -71,12 +73,16 @@ class BusStop(models.Model):
 
         return related_stops
 
-    def get_bus_by_stop(self):
+    def get_bus_by_stop(self) -> list:
         """Возвращает список автобусов, проходящих через остановку.
         Принимает объект остановки.
         """
         orders = Order.objects.filter(bus_stop=self)
         buses = {order.router.bus for order in orders}
+        buses = sorted(
+            buses,
+            key=cmp_to_key(lambda bus1, bus2: compare_name(bus1.number, bus2.number))
+        )
         return buses
 
     @staticmethod

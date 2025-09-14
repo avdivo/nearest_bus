@@ -1,6 +1,5 @@
 # Вспомогательные функции
 import telebot
-import logging
 
 from django.utils import timezone
 
@@ -46,7 +45,4 @@ def main_menu():
     args = ['Избранное', 'Полное расписание', '', 'Button 4']
     return (telebot.types.ReplyKeyboardMarkup(row_width=2).
             add(*[telebot.types.KeyboardButton(name) for name in args]))
-
-# Логгер для отправки сообщений в телеграм
-
 

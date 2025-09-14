@@ -6,17 +6,19 @@ import json
 import random
 import string
 import logging
-from datetime import datetime, date
 from telebot import types
+from datetime import datetime
+from functools import cmp_to_key
 
 from django.conf import settings
 
-from schedule.models import BusStop, Schedule, Holiday, StopGroup
 from tbot.models import IdsForName
-
-from schedule.services.timestamp import answer_by_two_busstop, time_generator
+from schedule.models import BusStop, Schedule, Holiday, StopGroup
+from schedule.services.timestamp import route_analysis, time_generator, preparing_bus_list, answer_by_two_busstop
 from utils.translation import get_day_string, get_day_number
+from utils.sorted_buses import compare_name, sorted_buses
 from tbot.services.functions import date_now
+from schedule.services.full_schedule import full_schedule
 
 logger = logging.getLogger('alisa')
 
@@ -146,7 +148,7 @@ class ExeAddBusStop(Executor):
 
         if run and self.stage == 1:
             # ---------------- 2 этап - запрос направления ----------------
-            # Находим связанные с данной остановки (по названию или через группу)
+            # Находим остановки связанные с данной (по названию или через группу)
             bus_stop_name = StopGroup.get_group_by_stop_name(self.key_name)  # Сначала названия
             bus_stop = list(BusStop.objects.filter(name__in=bus_stop_name))  # Теперь объекты
 
@@ -166,34 +168,81 @@ class ExeAddBusStop(Executor):
         if run and self.stage == 2:
             # ---------------- 3 этап - сохранение маршрута ----------------
             # Находим объекты остановок по названиям и направлению
+            # Тех, что идут с остановок отправления на остановки прибытия
             start_name = self.other_fields['start']
-            bs_dict = BusStop.get_routers_by_two_busstop(start_name, self.key_name)
+            finish_name = self.key_name
+
+            # Формируем группы названий остановок отправления и прибытия
+            start_list = StopGroup.get_group_by_stop_name(start_name)  # Получаем остановки из групп
+
+            # Получаем объекты BusStop для всех найденных названий.
+            start_objects = list(BusStop.objects.filter(name__in=start_list))
+
             try:
-                # Сохраняем id начальной остановки
-                self.other_fields['start'] = bs_dict['start'].external_id
-                # Список автобусов на остановке
-                buses = bs_dict['start'].get_bus_by_stop()
+                # Находим все автобусы которые выходят из остановок отправления
+                buses = set()
+                for bus_stop in start_objects:
+                    # Добавляем все автобусы с каждой остановки
+                    buses.update(bus_stop.get_bus_by_stop())
+                # Сортируем
+                buses = sorted(
+                    buses,
+                    key=cmp_to_key(lambda bus1, bus2: compare_name(bus1.number, bus2.number))
+                )
             except AttributeError:
+                raise
                 # Если остановка не найдена, то выводим сообщение и завершаем действие
-                self.bot.send_message(self.message.chat.id, '⚠️ Возможно между этими остановками нет прямого маршрута. '
+                self.bot.send_message(self.message.chat.id, '⚠️ Между этими остановками нет прямого маршрута. '
                                                             'Попробуйте выбрать другие остановки.')
                 self.stage = 0
                 return f'{self.__class__.__name__} - {self.stage}'
 
+            # Определяем автобусы, которые идут по нужному маршруту
+            # с любой из остановок отправления на любую остановку прибытия
+            # Собираем их в словарь по остановкам отправления со списком
+            # номеров автобусов для каждой.
+
+            # Получаем список словарей со всеми автобусами, для каждого сочетания
+            # остановок отправления и прибытия
+            analysis = route_analysis(start_name, finish_name)
+
+            # Преобразуем словарь с ключами из названий остановок: start - finish.
+            # А в значениях списки автобусов.
+            # Одновременно фильтруем по приоритету, оставляем только 1 и 2
+            bs_dict = {}
+            for item in analysis:
+                if item['priority'] not in [1, 2]:
+                    continue  # Фильтр по приоритету
+                name = f"{item['start'].name} - {item['finish'].name}"
+                bus = item['bus'].number
+                if name not in bs_dict:
+                    bs_dict[name] = [bus]
+                else:
+                    bs_dict[name].append(bus)
+            # Удаляем дубликаты, сортируем
+            for key, value in bs_dict.items():
+                bs_dict[key] = sorted_buses(set(value))
+
             # Автосохранение маршрута
             favorites = json.loads(self.user.parameter.favorites)
-            base_name = f'{start_name} - {self.key_name}'
+            base_name = f'{start_name} - {finish_name}'
             name = base_name
             i = 1
+            # Ищем свободное название маршрута
             while name in favorites:
                 name = f'{base_name} {str(i)}'
                 i += 1
 
             # Составляем строку для сообщения
-            string = (f'🚥 На остановке "{bs_dict["start"].name}"\nостанавливаются следующие автобусы:\n' +
+            string = (f'🚥 На остановках "{', '.join(start_list)}"\nостанавливаются следующие автобусы:\n' +
                       ', '.join([str(bus.number) for bus in buses]) +
-                      f'.\n\n🚥 Из них, по выбранному вами маршруту, до остановки "{self.key_name}" идут автобусы:\n' +
-                      ', '.join([str(bus.number) for bus in bs_dict['buses']]))
+                      f'.\n\n🚌 Вам подходят автобусы:\n')
+            select_buses = set()
+            for bs_name, buses_list in bs_dict.items():
+                string += f'🚥 {bs_name}:\n' + ", ".join(buses_list) + "."
+                select_buses.update(buses_list)
+
+            select_buses = list(select_buses)
             logger.warning(f'Пользователь {self.user.user_name} {self.user.user_id} добавил маршрут "{base_name}".')
 
             # Отправляем сообщение со списком автобусов и приглашением ввести имя для сохранения
@@ -201,9 +250,9 @@ class ExeAddBusStop(Executor):
             self.bot.send_message(self.message.chat.id, f'💾 Маршрут сохранен в Мои маршруты под именем:\n"{name}"')
 
             # Сохраняем параметры
-            self.other_fields['finish'] = bs_dict['finish'].external_id
+            self.other_fields['finish'] = finish_name
             # Список автобусов которые будут сохранены как выбранные
-            self.other_fields['check'] = [bus.number for bus in bs_dict['buses']]
+            self.other_fields['check'] = select_buses
 
             # Сохраняем маршрут в Избранное (favorites)
             save = json.loads(self.user.parameter.favorites)
@@ -277,69 +326,93 @@ class MyRouter(Executor):
             print(f'Пользователь {self.user.user_name} {self.user.user_id} посмотрел маршрут "{key_name}".')
             check = favorites[key_name]['check']  # Список автобусов
 
-            # Находим объект остановки по id
-            start = favorites[key_name]['start']
-            start = BusStop.objects.get(external_id=start)
+            # Получаем названия сохраненных остановок
+            start = favorites[key_name].get('start', None)
+            finish = favorites[key_name].get('finish', None)
 
             # Определяем текущее время с поправкой на часовой пояс
             time_now = date_now().time()  # конвертируем время в текущий часовой пояс
 
             # Вид отображения расписания
-            mode = favorites[key_name].get('view', 'По времени')
+            mode = 'time'  # По времени, для ближайших автобусов
 
+            # ----------------------------------------------------------
             # Возможно передан день недели из дополнительной клавиатуры.
             # Значит выводим полное расписание остановки за выбранный день.
             if self.key_name in week:
-                count = '24 часа'
-                day = get_day_number(self.key_name)  # Получаем номер дня недели
-                buses_obj = start.get_bus_by_stop()  # Получаем список автобусов на остановке
-                check = [bus.number for bus in buses_obj]  # В данном случае показываем все
-                time_now = datetime.strptime('03:00', '%H:%M').time()  # Время начала дня
-                mode = 'По автобусам'
+                mode = 'bus'  # По автобусам, для полного расписания
 
-            # За какой промежуток времени выводить расписание
-            if count is None:
-                count = favorites[key_name].get('count', '30 минут')
-            delta = {
-                '15 минут': 15,
-                '30 минут': 30,
-                '1 час': 60,
-                '2 часа': 120,
-                '3 часа': 180,
-                '24 часа': 1440
-            }
+                # Для получения объектов остановок отправления
+                # нужно проанализировать маршруты между остановками
+                # отправления и прибытия.
+                routers = route_analysis(start, finish)  # Получаем маршруты
+                # start_obj = {(obj["start"], obj["final_stop_finish"])
+                #              for obj in routers if obj["start"].name == start}  # Выбираем нужные
 
-            # Для каждого автобуса в списке из favorites.
-            # Найдем в модели Schedule 2 записи с этим автобусом и остановкой start после текущего времени.
-            # Отсортируем по времени и сохраним в словарь по автобусу.
+                # Получаем сет кортежей:
+                # (остановка отправления, конечная остановка)
+                start_obj = {(obj["start"], obj["final_stop_finish"]) for obj in routers}  # Переформатируем
 
-            # От способа отображения зависит способ сборки данных и вывода.
-            # Для вида По автобусам создаем словарь {автобус: [время1, время2 (в datetime)]}
-            # Для вида По времени создаем словарь {время (в datetime): [автобус1, автобус2]}
-            schedule = dict()
-            for bus in check:
-                # Находим записи в расписании
-                sch = Schedule.objects.filter(
-                    bus_stop=start, bus__number=bus, day=day).order_by('time')
-                if len(sch) == 0:  # Если записей нет, переходим к следующему автобусу
-                    continue
-                if mode == 'По времени':
-                    # Сохраняем в словарь
-                    for time_obj in sch:
-                        if time_obj.time not in schedule:
-                            schedule[time_obj.time] = [bus]
-                        else:
-                            schedule[time_obj.time].append(bus)
-                    # Сортируем по времени
-                    schedule = dict(sorted(schedule.items(), key=lambda x: x[0]))
-                    gen = time_generator(list(schedule), time_now, delta[count])
-                    schedule = {time: schedule[time] for time in gen}
-                else:
-                    # Сохраняем в словарь
-                    gen = time_generator([time_obj.time for time_obj in sch], time_now, delta[count])
-                    times = [time for time in gen]
-                    if times:
-                        schedule[bus] = times
+                # Для каждой остановки получаем полное расписание на ней
+                # формируем ответ отдельно для каждой остановки и отправляем
+                # и отправляем в тг
+                for start, final_stop_finish:
+                    text = ""
+                    text += f"🚥 Остановка {start.name}\n(в сторону {final_stop_finish.name})\n"
+
+                    # Получаем все автобусы с остановки отправления
+
+                    # Получаем расписание на остановке
+                    schedule = full_schedule(start)
+
+
+
+            # ----------------------------------------------------------
+            # Нужно показать ближайшие автобусы
+            if mode == 'time':
+                # За какой промежуток времени выводить расписание
+                if count is None:
+                    count = favorites[key_name].get('count', '30 минут')
+                delta = {
+                    '15 минут': 15,
+                    '30 минут': 30,
+                    '1 час': 60,
+                    '2 часа': 120,
+                    '3 часа': 180,
+                    '24 часа': 1440
+                }
+
+                try:
+                    # Расписание автобусов на остановках отправления
+                    # Формат возвращаемого словаря в файле
+                    # "Логика поиска остановок и автобусов на них.txt"
+                    schedule = answer_by_two_busstop(start, finish)
+                    print("======================\n", schedule)
+                except:
+                    # Если остановка не найдена, то выводим сообщение и завершаем действие
+                    return (f'Между остановками {start} и {finish} нет прямого автобуса. '
+                            f'Пожалуйста, выберите другой маршрут.')
+
+                time_now = date_now().time()  # Получаем текущее время в нужном часовом поясе
+                # Перебираем полученные временные метки
+                gen = time_generator(list(schedule), time_now, delta[count])
+                text = ""
+                for time in gen:
+                    # Готовим словарь для вывода
+                    time_str = time.strftime("%H:%M")  # Время отправления автобуса (str)
+                    text += f'{time_str} - '  # Надцать часов минут
+
+                    # Подготовка списка автобусов
+                    text += preparing_bus_list(schedule[time], start)
+                if not text:
+                    text = f'⚠️ Нет автобусов на период - *{count}*.\n'
+                print(text)
+
+            # Получаем расписание
+            # schedule = answer_by_two_busstop(start, finish)
+
+            # Подготовка списка автобусов
+            # text += preparing_bus_list(buses, name_start)
 
             # Выводим только count временных отметок для каждого автобуса в режиме По автобусам
             # В режиме По времени выводим только count временных отметок
