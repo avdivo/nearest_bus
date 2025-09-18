@@ -73,11 +73,18 @@ class BusStop(models.Model):
 
         return related_stops
 
-    def get_bus_by_stop(self) -> list:
-        """Возвращает список автобусов, проходящих через остановку.
-        Принимает объект остановки.
+    @staticmethod
+    def get_bus_by_stop(start_list: list) -> list:
         """
-        orders = Order.objects.filter(bus_stop=self)
+        Args:
+            start_list - список остановок отправления
+        Returns:
+            Cписок автобусов, проходящих через остановки
+        """
+        # Получаем объекты BusStop для всех найденных названий.
+        start_objects = list(BusStop.objects.filter(name__in=start_list))
+
+        orders = Order.objects.filter(bus_stop__in=start_objects)
         buses = {order.router.bus for order in orders}
         buses = sorted(
             buses,
@@ -263,15 +270,15 @@ class StopGroup(models.Model):
         verbose_name_plural = 'Группы остановок назначения'
 
     @staticmethod
-    def get_group_by_stop_name(start_name: str, finish_name: str) -> Dict[str, List[str]]:
-        """пынок чехова
+    def get_group_by_stop_name(start_name: str, finish_name: str = None) -> Dict[str, List[str]]:
+        """
         Формирует списки остановок отправления и прибытия учитывая группы.
         (Группы - это расположенные рядом остановки, которые можно рассматривать
         как одно место отправления или прибытия.)
         
         Args:
             start_name - название остановки отправления
-            finish_name - название остановки прибытия
+            finish_name - название остановки прибытия (не обязательно)
         
         Returns:
             {
@@ -285,6 +292,7 @@ class StopGroup(models.Model):
             Если обе остановки принадлежат одной группе, 
             то остальные остановки из групп игнорируются. 
             Возвращаются по 1 остановке в каждой группе, те, что пришли.
+            Если остановка одна проверка не выполняется.
 
             Если название остановок совпадает - Возврашает пустой словарь
         """
@@ -315,12 +323,9 @@ class StopGroup(models.Model):
                 # Пропускаем группы с некорректным JSON
                 continue
 
-        if (start_name in finish_stops_set) or (finish_name in start_stops_set):
+        if finish_name and (start_name in finish_stops_set) or (finish_name in start_stops_set):
             start_stops_set.clear()
             finish_stops_set.clear()
-
-            print(start_stops_set)
-            print(finish_stops_set)
 
         return {
             "start_names": [start_name] + list(start_stops_set - {start_name}),

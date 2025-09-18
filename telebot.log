@@ -1246,3 +1246,144 @@ schedule.models.BusStop.DoesNotExist: BusStop matching query does not exist.
                   ~~~~~^^^^^^^^^^^^^^^
 KeyError: 'finish_name'
 
+2025-09-18 18:18:44,007 - TeleBot - ERROR - ------------------------------
+2025-09-18 18:18:44,008 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: 'start_name'
+2025-09-18 18:18:44,010 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 175, in execute
+    start_list = stops_lists["start_name"]  # Названия остановок отправления
+                 ~~~~~~~~~~~^^^^^^^^^^^^^^
+KeyError: 'start_name'
+
+2025-09-18 18:20:09,822 - TeleBot - ERROR - ------------------------------
+2025-09-18 18:20:09,822 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: BusStop matching query does not exist.
+2025-09-18 18:20:09,826 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 581, in execute
+    buses = self.make_bus_list_by_buss(self.other_fields['favorites']['start'])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 471, in make_bus_list_by_buss
+    bus_stop = BusStop.objects.get(external_id=busstop_id)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/query.py", line 649, in get
+    raise self.model.DoesNotExist(
+schedule.models.BusStop.DoesNotExist: BusStop matching query does not exist.
+
+2025-09-18 19:00:59,805 - TeleBot - ERROR - ------------------------------
+2025-09-18 19:00:59,805 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: BusStop.get_bus_by_stop() missing 1 required positional argument: 'self'
+2025-09-18 19:00:59,807 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 178, in execute
+    buses = BusStop.get_bus_by_stop()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: BusStop.get_bus_by_stop() missing 1 required positional argument: 'self'
+
+2025-09-18 19:01:55,009 - TeleBot - ERROR - ------------------------------
+2025-09-18 19:01:55,010 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: Field 'id' expected a number but got ['Торговый центр'].
+2025-09-18 19:01:55,015 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py", line 2117, in get_prep_value
+    return int(value)
+           ^^^^^^^^^^
+TypeError: int() argument must be a string, a bytes-like object or a real number, not 'list'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 178, in execute
+    buses = BusStop.get_bus_by_stop(start_list)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/schedule/models.py", line 80, in get_bus_by_stop
+    orders = Order.objects.filter(bus_stop=self)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/query.py", line 1476, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/query.py", line 1494, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/query.py", line 1501, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 1613, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 1645, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 1559, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 1389, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/lookups.py", line 30, in __init__
+    self.rhs = self.get_prep_lookup()
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/fields/related_lookups.py", line 156, in get_prep_lookup
+    self.rhs = target_field.get_prep_value(self.rhs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py", line 2119, in get_prep_value
+    raise e.__class__(
+TypeError: Field 'id' expected a number but got ['Торговый центр'].
+
+2025-09-18 19:03:00,914 - TeleBot - ERROR - ------------------------------
+2025-09-18 19:03:00,914 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: Cannot resolve keyword 'bus_stop_in' into field. Choices are: bus_stop, bus_stop_id, id, order_number, router, router_id
+2025-09-18 19:03:00,919 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 178, in execute
+    buses = BusStop.get_bus_by_stop(start_list)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/schedule/models.py", line 87, in get_bus_by_stop
+    orders = Order.objects.filter(bus_stop_in=start_objects)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/query.py", line 1476, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/query.py", line 1494, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/query.py", line 1501, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 1613, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 1645, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 1495, in build_filter
+    lookups, parts, reffed_expression = self.solve_lookup_type(arg, summarize)
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 1307, in solve_lookup_type
+    _, field, _, lookup_parts = self.names_to_path(lookup_splitted, self.get_meta())
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 1772, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'bus_stop_in' into field. Choices are: bus_stop, bus_stop_id, id, order_number, router, router_id
+

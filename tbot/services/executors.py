@@ -172,27 +172,10 @@ class ExeAddBusStop(Executor):
                 self.stage = 0
                 return f'{self.__class__.__name__} - {self.stage}'
 
-            start_list = stops_lists["start_name"]  # Названия остановок отправления
-            # Получаем объекты BusStop для всех найденных названий.
-            start_objects = list(BusStop.objects.filter(name__in=start_list))
+            start_list = stops_lists["start_names"]  # Названия остановок отправления
 
-            try:
-                # Находим все автобусы которые выходят из остановок отправления
-                buses = set()
-                for bus_stop in start_objects:
-                    # Добавляем все автобусы с каждой остановки
-                    buses.update(bus_stop.get_bus_by_stop())
-                # Сортируем
-                buses = sorted(
-                    buses,
-                    key=cmp_to_key(lambda bus1, bus2: compare_name(bus1.number, bus2.number))
-                )
-            except AttributeError:
-                # Если остановка не найдена, то выводим сообщение и завершаем действие
-                self.bot.send_message(self.message.chat.id, '⚠️ Между этими остановками нет прямого маршрута. '
-                                                            'Попробуйте выбрать другие остановки.')
-                self.stage = 0
-                return f'{self.__class__.__name__} - {self.stage}'
+            # Находим все автобусы которые выходят из остановок отправления
+            buses = BusStop.get_bus_by_stop(start_list)
 
             # Определяем автобусы, которые идут по нужному маршруту
             # с любой из остановок отправления на любую остановку прибытия
