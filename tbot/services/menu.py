@@ -11,7 +11,7 @@ from django.core.exceptions import PermissionDenied
 
 from telebot import types
 
-from tbot.services.executors import Executor, ExeAddBusStop, MyRouter, MyRouterSetting, ExeMessage
+from tbot.services.executors import Executor, ExeAddBusStop, MyRouter, MyRouterSetting
 from tbot.services.functions import authorize
 from alisa.services.talk_to_alisa import answer_to_alisa
 
@@ -92,7 +92,8 @@ def menu(bot, message, open_menu=None):
         # В списке количество словарей - это количество строк,
         # а количество ключей в словаре - это количество кнопок в строке.
         # Отображаем клавиатуру соответствующего вида
-        markup = types.ReplyKeyboardMarkup()
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=
+     True)
         for item in kb[point_menu]:
             markup.row(*(types.KeyboardButton(button) for button in item.keys()))
         bot.send_message(message.chat.id, f'{point_menu}', reply_markup=markup)
@@ -117,7 +118,7 @@ def menu(bot, message, open_menu=None):
 
         # Тут можно обработать необработанные сообщения, если answer is None.
 
-        print(f"Ответ программы: {answer.answer}", message.text)
+        # print(f"Ответ программы: {answer.answer}", message.text)
         if answer.answer is None:
             # Телеграм не обработал запрос, передаем его Алисе
             # При этом произойдет регистрация пользователя в Алисе

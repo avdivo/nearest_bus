@@ -61,20 +61,37 @@ def time_generator(time_marks, start_time, duration) -> list:
 
 
 def route_analysis(start_stop_name: str, finish_stop_name: str) -> List:
-    """Анализ маршрутов определение приоритетов маршрутов.
+    """Анализ маршрутов, определение приоритетов маршрутов.
     Находит все автобусы, которые идут от каждой остановки
     отправления к каждой остановке прибытия. Определяет наиболее
-    релевантные автобусы, для каждого случая определяет приоритет -
+    релевантные автобусы, для каждого случая и назначает приоритет -
     т.е. удобство добраться этим автобусом.
+
+    Args: 
+        start_stop_name - остановка отправления
+        finish_stop_name - остановка прибытия
+
+    Returns:
+        [
+            {
+                "priority": priority,                       (приоритет)
+                "bus": bus,                                 (автобус)
+                "start": start_bus_stop,                    (остановка отправления)
+                "finish": finish_bus_stop,                  (остановка прибытия)
+                "final_stop_start": analysis_part[0],       (конечная, откуда едет)
+                "final_stop_finish": analysis_part[-1],     (конечная, куда едет)
+            }
+        ]
+
+        Пустой список вернет если нет автобусов или 
+        остановки отправления и прибытия одноименные.
     """
-    # 0 --------------------------------
-    # Получаем все остановки из базы данных.
-    all_stops = BusStop.get_all_bus_stops_names()
     # 1 --------------------------------
     # Формируем группы остановок. Логика полностью переписана в соответствии
     # с реальной структурой модели StopGroup (JSON-поле list_name).
-    start_list = StopGroup.get_group_by_stop_name(start_stop_name)  # Получаем остановки из групп
-    finish_list = StopGroup.get_group_by_stop_name(finish_stop_name)  # Получаем остановки из групп
+    names = StopGroup.get_group_by_stop_name(start_stop_name, finish_stop_name)
+    start_list = names["start_names"]  # Получаем остановки из групп
+    finish_list = names["finish_names"]  # Получаем остановки из групп
 
     # 2 --------------------------------
     # Получаем объекты BusStop для всех найденных названий.
@@ -158,8 +175,14 @@ def route_analysis(start_stop_name: str, finish_stop_name: str) -> List:
                     "final_stop_finish": analysis_part[-1],
                 })
 
-    # for k in found_routes:
-    #     print(k)
+    # Сохраняей вывод в файл
+    with open('log.tmp', 'w', encoding='utf-8') as f:
+        for item in found_routes:
+            for k in item.items():
+                print(k, file=f)
+            print(file=f)
+
+
     return found_routes
 
 
@@ -369,7 +392,7 @@ def preparing_bus_list(buses, name_start) -> str:
                 # двух разных остановок с одинаковым названием
                 if not add_text:
                     add_text += f'От остановки {bus_dict["start"].name}. '
-                add_text += f'Которая в сторону конечной {bus_dict["final_stop_finish"].name}. '
+                add_text += f'В сторону конечной {bus_dict["final_stop_finish"].name}. '
             if "finish_deff" in modifiers:
                 # Hазвание остановки прибытия
                 # не совпадает с изначально запрошенным
@@ -385,6 +408,6 @@ def preparing_bus_list(buses, name_start) -> str:
 
         # Добавляем номер автобуса и модификатор в ответ
         add_text = f"({add_text})" if add_text else ''
-        text += f'Автобус №{bus_number} {add_text}\n'
+        text += f'{bus_number} {add_text}\n'
 
     return text

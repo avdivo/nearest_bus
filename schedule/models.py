@@ -263,14 +263,37 @@ class StopGroup(models.Model):
         verbose_name_plural = 'Группы остановок назначения'
 
     @staticmethod
-    def get_group_by_stop_name(stop_name: str) -> List[str]:
+    def get_group_by_stop_name(start_name: str, finish_name: str) -> Dict[str, List[str]]:
+        """пынок чехова
+        Формирует списки остановок отправления и прибытия учитывая группы.
+        (Группы - это расположенные рядом остановки, которые можно рассматривать
+        как одно место отправления или прибытия.)
+        
+        Args:
+            start_name - название остановки отправления
+            finish_name - название остановки прибытия
+        
+        Returns:
+            {
+                "start_names: список остановок отправления", 
+                "finish_names": список остановок прибытия
+            }
+            Возвращает список названий остановок из групп,
+            в которые входит данная остановка.
+            Эта остановка будет первой в списке.
+
+            Если обе остановки принадлежат одной группе, 
+            то остальные остановки из групп игнорируются. 
+            Возвращаются по 1 остановке в каждой группе, те, что пришли.
+
+            Если название остановок совпадает - Возврашает пустой словарь
         """
-        Возвращает список названий остановок из групп,
-        в которые входит данная остановка.
-        Эта остановка будет первой в списке.
-        """
+        if start_name == finish_name:
+            raise ValueError("Одноименные остановки отправления и прибытия")
+        
         all_groups = StopGroup.objects.all()  # Получаем все группы остановок
-        stops_set = set()  # Список для накопления названий остановок
+        start_stops_set = set()  # Список для накопления названий остановок отправления
+        finish_stops_set = set()  # Список для накопления названий остановок прибытия
         for group in all_groups:
             try:
                 # Загружаем список названий из JSON-поля
@@ -279,13 +302,28 @@ class StopGroup(models.Model):
                     continue  # Пропускаем, если формат не является списком
 
                 # Проверяем вхождение названия в группу
-                if stop_name in stop_names_in_group:
+                if start_name in stop_names_in_group:
                     for name in stop_names_in_group:
-                        stops_set.add(name)
+                        start_stops_set.add(name)
+
+                # Проверяем вхождение названия в группу
+                if finish_name in stop_names_in_group:
+                    for name in stop_names_in_group:
+                        finish_stops_set.add(name)
 
             except json.JSONDecodeError:
                 # Пропускаем группы с некорректным JSON
                 continue
 
-        return [stop_name] + list(stops_set - {stop_name})
+        if (start_name in finish_stops_set) or (finish_name in start_stops_set):
+            start_stops_set.clear()
+            finish_stops_set.clear()
+
+            print(start_stops_set)
+            print(finish_stops_set)
+
+        return {
+            "start_names": [start_name] + list(start_stops_set - {start_name}),
+            "finish_names": [finish_name] + list(finish_stops_set - {finish_name})
+        }
 

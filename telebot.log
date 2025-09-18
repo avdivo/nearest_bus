@@ -1,0 +1,1248 @@
+2025-07-04 19:47:21,407 - TeleBot - ERROR - ------------------------------
+2025-07-04 19:47:21,407 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: 'list' object has no attribute 'query'
+2025-07-04 19:47:21,412 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 162, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 264, in execute
+    bs_dict = BusStop.get_routers_by_two_busstop(start_name, self.key_name)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/schedule/models.py", line 106, in get_routers_by_two_busstop
+    common_routers = routers_one.intersection(routers_two)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/query.py", line 1551, in intersection
+    return self._combinator_query("intersection", *other_qs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/query.py", line 1526, in _combinator_query
+    clone.query.combined_queries = (self.query,) + tuple(
+                                                   ^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/query.py", line 1527, in <genexpr>
+    qs.query for qs in other_qs
+    ^^^^^^^^
+AttributeError: 'list' object has no attribute 'query'
+
+2025-07-05 07:07:24,610 - TeleBot - ERROR - ------------------------------
+2025-07-05 07:07:24,610 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: Cannot filter against a non-conditional expression.
+2025-07-05 07:07:24,617 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 162, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 264, in execute
+    bs_dict = BusStop.get_routers_by_two_busstop(start_name, self.key_name)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/schedule/models.py", line 116, in get_routers_by_two_busstop
+    routers_two = set(Router.objects.filter(Router.objects.filter(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/query.py", line 1476, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/query.py", line 1494, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/query.py", line 1501, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 1613, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 1645, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 1485, in build_filter
+    raise TypeError("Cannot filter against a non-conditional expression.")
+TypeError: Cannot filter against a non-conditional expression.
+
+2025-07-05 07:08:53,545 - TeleBot - ERROR - ------------------------------
+2025-07-05 07:08:53,545 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: Cannot filter against a non-conditional expression.
+2025-07-05 07:08:53,550 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 162, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 264, in execute
+    bs_dict = BusStop.get_routers_by_two_busstop(start_name, self.key_name)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/schedule/models.py", line 116, in get_routers_by_two_busstop
+    routers_two = set(Router.objects.filter(Router.objects.filter(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/query.py", line 1476, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/query.py", line 1494, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/query.py", line 1501, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 1613, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 1645, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 1485, in build_filter
+    raise TypeError("Cannot filter against a non-conditional expression.")
+TypeError: Cannot filter against a non-conditional expression.
+
+2025-07-05 07:32:45,841 - TeleBot - ERROR - ------------------------------
+2025-07-05 07:32:45,841 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: Expecting value: line 1 column 2 (char 1)
+2025-07-05 07:32:45,845 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 162, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 264, in execute
+    bs_dict = BusStop.get_routers_by_two_busstop(start_name, self.key_name)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/schedule/models.py", line 82, in get_routers_by_two_busstop
+    json.loads(obj.list_name)
+  File "/usr/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 2 (char 1)
+
+2025-07-05 07:34:47,134 - TeleBot - ERROR - ------------------------------
+2025-07-05 07:34:47,134 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: unhashable type: 'list'
+2025-07-05 07:34:47,135 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 162, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 264, in execute
+    bs_dict = BusStop.get_routers_by_two_busstop(start_name, self.key_name)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/schedule/models.py", line 91, in get_routers_by_two_busstop
+    target_stops.add(list_name)
+TypeError: unhashable type: 'list'
+
+2025-07-05 07:36:30,252 - TeleBot - ERROR - ------------------------------
+2025-07-05 07:36:30,252 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: unhashable type: 'list'
+2025-07-05 07:36:30,255 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 162, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 264, in execute
+    bs_dict = BusStop.get_routers_by_two_busstop(start_name, self.key_name)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/schedule/models.py", line 91, in get_routers_by_two_busstop
+    target_stops.add(list_name)
+TypeError: unhashable type: 'list'
+
+2025-07-05 07:40:48,608 - TeleBot - ERROR - ------------------------------
+2025-07-05 07:40:48,609 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: unsupported operand type(s) for +: 'set' and 'set'
+2025-07-05 07:40:48,611 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 162, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 264, in execute
+    bs_dict = BusStop.get_routers_by_two_busstop(start_name, self.key_name)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/schedule/models.py", line 113, in get_routers_by_two_busstop
+    routers_two = routers_two + routers
+                  ~~~~~~~~~~~~^~~~~~~~~
+TypeError: unsupported operand type(s) for +: 'set' and 'set'
+
+2025-07-05 07:42:19,320 - TeleBot - ERROR - ------------------------------
+2025-07-05 07:42:19,320 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: 'NoneType' object has no attribute 'order_number'
+2025-07-05 07:42:19,322 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 162, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 264, in execute
+    bs_dict = BusStop.get_routers_by_two_busstop(start_name, self.key_name)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/schedule/models.py", line 143, in get_routers_by_two_busstop
+    if order_one.order_number > order_two.order_number:
+                                ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'order_number'
+
+2025-07-05 08:03:58,250 - TeleBot - ERROR - ------------------------------
+2025-07-05 08:03:58,251 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: 'NoneType' object has no attribute 'order_number'
+2025-07-05 08:03:58,253 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 162, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 264, in execute
+    bs_dict = BusStop.get_routers_by_two_busstop(start_name, self.key_name)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/schedule/models.py", line 144, in get_routers_by_two_busstop
+    if order_one.order_number > order_two.order_number:
+                                ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'order_number'
+
+2025-09-10 17:05:22,970 - TeleBot - ERROR - ------------------------------
+2025-09-10 17:05:22,971 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: object of type 'NoneType' has no len()
+2025-09-10 17:05:22,972 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 148, in echo_message
+    menu(bot, message)
+  File "/home/avdivo/python/nearest_bus/tbot/services/menu.py", line 135, in menu
+    bot.send_message(message.chat.id, answer_to_alisa(request_body))
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/alisa/services/talk_to_alisa.py", line 255, in answer_to_alisa
+    return say_schedule(out[0], out[1])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/alisa/services/talk_to_alisa.py", line 133, in say_schedule
+    if len(schedule):
+       ^^^^^^^^^^^^^
+TypeError: object of type 'NoneType' has no len()
+
+2025-09-10 17:06:47,646 - TeleBot - ERROR - ------------------------------
+2025-09-10 17:06:47,647 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: object of type 'NoneType' has no len()
+2025-09-10 17:06:47,649 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 148, in echo_message
+    menu(bot, message)
+  File "/home/avdivo/python/nearest_bus/tbot/services/menu.py", line 135, in menu
+    bot.send_message(message.chat.id, answer_to_alisa(request_body))
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/alisa/services/talk_to_alisa.py", line 255, in answer_to_alisa
+    return say_schedule(out[0], out[1])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/alisa/services/talk_to_alisa.py", line 133, in say_schedule
+    if len(schedule):
+       ^^^^^^^^^^^^^
+TypeError: object of type 'NoneType' has no len()
+
+2025-09-11 13:08:55,788 - TeleBot - ERROR - ------------------------------
+2025-09-11 13:08:55,788 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: type object 'BusStop' has no attribute 'get_routers_by_two_busstop'
+2025-09-11 13:08:55,795 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 64, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 170, in execute
+    bs_dict = BusStop.get_routers_by_two_busstop(start_name, self.key_name)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: type object 'BusStop' has no attribute 'get_routers_by_two_busstop'
+
+2025-09-11 13:10:59,244 - TeleBot - ERROR - ------------------------------
+2025-09-11 13:10:59,244 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: 'start'
+2025-09-11 13:10:59,245 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 64, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 173, in execute
+    self.other_fields['start'] = bs_dict['start'].external_id
+                                 ~~~~~~~^^^^^^^^^
+KeyError: 'start'
+
+2025-09-11 13:11:27,154 - TeleBot - ERROR - ------------------------------
+2025-09-11 13:11:27,155 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: 'start'
+2025-09-11 13:11:27,155 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 64, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 173, in execute
+    self.other_fields['start'] = bs_dict['start'].external_id
+                                 ~~~~~~~^^^^^^^^^
+KeyError: 'start'
+
+2025-09-11 16:38:47,115 - TeleBot - ERROR - ------------------------------
+2025-09-11 16:38:47,115 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: unhashable type: 'set'
+2025-09-11 16:38:47,117 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 64, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 185, in execute
+    buses.add(bus_stop.get_bus_by_stop())
+TypeError: unhashable type: 'set'
+
+2025-09-11 16:39:33,415 - TeleBot - ERROR - ------------------------------
+2025-09-11 16:39:33,415 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: 'start'
+2025-09-11 16:39:33,419 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 64, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 208, in execute
+    string = (f'🚥 На остановке "{bs_dict["start"].name}"\nостанавливаются следующие автобусы:\n' +
+                                  ~~~~~~~^^^^^^^^^
+KeyError: 'start'
+
+2025-09-11 16:41:19,350 - TeleBot - ERROR - ------------------------------
+2025-09-11 16:41:19,351 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: 'start'
+2025-09-11 16:41:19,352 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 64, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 208, in execute
+    string = (f'🚥 На остановке "{bs_dict["start"].name}"\nостанавливаются следующие автобусы:\n' +
+                                  ~~~~~~~^^^^^^^^^
+KeyError: 'start'
+
+2025-09-11 16:42:02,541 - TeleBot - ERROR - ------------------------------
+2025-09-11 16:42:02,541 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: 'start'
+2025-09-11 16:42:02,542 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 64, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 208, in execute
+    string = (f'🚥 На остановке "{bs_dict["start"].name}"\nостанавливаются следующие автобусы:\n' +
+                                  ~~~~~~~^^^^^^^^^
+KeyError: 'start'
+
+2025-09-11 18:14:34,475 - TeleBot - ERROR - ------------------------------
+2025-09-11 18:14:34,476 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: 'start'
+2025-09-11 18:14:34,478 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 64, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 205, in execute
+    string = (f'🚥 На остановке "{bs_dict["start"].name}"\nостанавливаются следующие автобусы:\n' +
+                                  ~~~~~~~^^^^^^^^^
+KeyError: 'start'
+
+2025-09-11 22:12:52,489 - TeleBot - ERROR - ------------------------------
+2025-09-11 22:12:52,489 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: sequence item 0: expected str instance, Bus found
+2025-09-11 22:12:52,490 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 65, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 234, in execute
+    string += f'🚥 {bs_name}:\n' + ", ".join(buses_list)
+                                   ^^^^^^^^^^^^^^^^^^^^^
+TypeError: sequence item 0: expected str instance, Bus found
+
+2025-09-11 22:14:39,663 - TeleBot - ERROR - ------------------------------
+2025-09-11 22:14:39,663 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: 'Bus' object has no attribute 'name'
+2025-09-11 22:14:39,665 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 65, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 212, in execute
+    bus = item['bus'].name
+          ^^^^^^^^^^^^^^^^
+AttributeError: 'Bus' object has no attribute 'name'
+
+2025-09-11 22:20:00,610 - TeleBot - ERROR - ------------------------------
+2025-09-11 22:20:00,611 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: BusStop matching query does not exist.
+2025-09-11 22:20:00,615 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 65, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 558, in execute
+    buses = self.make_bus_list_by_buss(self.other_fields['favorites']['start'])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 448, in make_bus_list_by_buss
+    bus_stop = BusStop.objects.get(external_id=busstop_id)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/query.py", line 649, in get
+    raise self.model.DoesNotExist(
+schedule.models.BusStop.DoesNotExist: BusStop matching query does not exist.
+
+2025-09-12 21:33:03,402 - TeleBot - ERROR - ------------------------------
+2025-09-12 21:33:03,404 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: min() iterable argument is empty
+2025-09-12 21:33:03,407 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 400, in execute
+    schedule = answer_by_two_busstop(start, finish)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/schedule/services/timestamp.py", line 184, in answer_by_two_busstop
+    min_priority = min(route['priority'] for route in found_routes)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: min() iterable argument is empty
+
+2025-09-12 21:35:12,021 - TeleBot - ERROR - ------------------------------
+2025-09-12 21:35:12,021 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: min() iterable argument is empty
+2025-09-12 21:35:12,024 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 400, in execute
+    schedule = answer_by_two_busstop(start, finish)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/schedule/services/timestamp.py", line 184, in answer_by_two_busstop
+    min_priority = min(route['priority'] for route in found_routes)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: min() iterable argument is empty
+
+2025-09-12 21:36:05,363 - TeleBot - ERROR - ------------------------------
+2025-09-12 21:36:05,364 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: 'str' object has no attribute 'name'
+2025-09-12 21:36:05,366 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 407, in execute
+    string = f'🚌 Маршрут *"{key_name}"*\nот остановки *"{start.name}"*\nна период *{count}*   ({get_day_string(day)})\n\n'
+                                                          ^^^^^^^^^^
+AttributeError: 'str' object has no attribute 'name'
+
+2025-09-12 21:47:07,773 - TeleBot - ERROR - ------------------------------
+2025-09-12 21:47:07,774 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: 'dict' object has no attribute 'start'
+2025-09-12 21:47:07,775 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 342, in execute
+    for obj in routers if obj.start.name == start}  # Выбираем нужные
+                          ^^^^^^^^^
+AttributeError: 'dict' object has no attribute 'start'
+
+2025-09-12 21:47:24,719 - TeleBot - ERROR - ------------------------------
+2025-09-12 21:47:24,720 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: 'dict' object has no attribute 'start'
+2025-09-12 21:47:24,722 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 342, in execute
+    for obj in routers if obj.start.name == start}  # Выбираем нужные
+                          ^^^^^^^^^
+AttributeError: 'dict' object has no attribute 'start'
+
+2025-09-12 23:48:27,946 - TeleBot - ERROR - ------------------------------
+2025-09-12 23:48:27,947 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: 'Bus' object has no attribute 'split'
+2025-09-12 23:48:27,949 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 188, in execute
+    buses = sorted_buses(list(buses))  # Сортируем по номерам
+            ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/utils/sorted_buses.py", line 42, in sorted_buses
+    return sorted(buses, key=cmp_to_key(compare_name))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/utils/sorted_buses.py", line 13, in compare_name
+    name_a = a.split('_')[0]
+             ^^^^^^^
+AttributeError: 'Bus' object has no attribute 'split'
+
+2025-09-13 12:49:35,899 - TeleBot - ERROR - ------------------------------
+2025-09-13 12:49:35,899 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: 'Торговый центр - Рынок'
+2025-09-13 12:49:35,902 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 657, in execute
+    del favorites[self.other_fields['name_rout']]
+        ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'Торговый центр - Рынок'
+
+2025-09-13 12:57:25,573 - TeleBot - ERROR - ------------------------------
+2025-09-13 12:57:25,574 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: dictionary update sequence element #0 has length 1; 2 is required
+2025-09-13 12:57:25,576 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 243, in execute
+    select_buses.update(buses_list)
+ValueError: dictionary update sequence element #0 has length 1; 2 is required
+
+2025-09-13 12:58:33,568 - TeleBot - ERROR - ------------------------------
+2025-09-13 12:58:33,568 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: sorted_buses() missing 1 required positional argument: 'buses'
+2025-09-13 12:58:33,569 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 245, in execute
+    select_buses = list(sorted_buses())
+                        ^^^^^^^^^^^^^^
+TypeError: sorted_buses() missing 1 required positional argument: 'buses'
+
+2025-09-13 13:00:50,011 - TeleBot - ERROR - ------------------------------
+2025-09-13 13:00:50,011 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: 'dict' object has no attribute 'start'
+2025-09-13 13:00:50,014 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 350, in execute
+    for obj in routers if obj.start.name == start}  # Выбираем нужные
+                          ^^^^^^^^^
+AttributeError: 'dict' object has no attribute 'start'
+
+2025-09-13 13:02:40,741 - TeleBot - ERROR - ------------------------------
+2025-09-13 13:02:40,741 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: 'dict' object has no attribute 'start'
+2025-09-13 13:02:40,743 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 351, in execute
+    for obj in routers if obj.start.name == start}  # Выбираем нужные
+                          ^^^^^^^^^
+AttributeError: 'dict' object has no attribute 'start'
+
+2025-09-13 13:04:43,765 - TeleBot - ERROR - ------------------------------
+2025-09-13 13:04:43,765 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: 'BusStop' object has no attribute 'final_stop_finish'
+2025-09-13 13:04:43,771 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 350, in execute
+    start_obj = {(obj["start"], obj["start"].final_stop_finish)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'BusStop' object has no attribute 'final_stop_finish'
+
+2025-09-13 13:11:14,071 - TeleBot - ERROR - ------------------------------
+2025-09-13 13:11:14,071 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: 'str' object has no attribute 'strftime'
+2025-09-13 13:11:14,074 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 432, in execute
+    string += f'{time.strftime("%H:%M")}  -  '
+                 ^^^^^^^^^^^^^
+AttributeError: 'str' object has no attribute 'strftime'
+
+2025-09-13 13:12:07,938 - TeleBot - ERROR - ------------------------------
+2025-09-13 13:12:07,939 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: 'str' object has no attribute 'strftime'
+2025-09-13 13:12:07,941 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 432, in execute
+    string += f'{time.strftime("%H:%M")}  -  '
+                 ^^^^^^^^^^^^^
+AttributeError: 'str' object has no attribute 'strftime'
+
+2025-09-13 13:15:07,788 - TeleBot - ERROR - ------------------------------
+2025-09-13 13:15:07,789 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: 'str' object has no attribute 'strftime'
+2025-09-13 13:15:07,792 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 431, in execute
+    string += f'{time.strftime("%H:%M")}  -  '
+                 ^^^^^^^^^^^^^
+AttributeError: 'str' object has no attribute 'strftime'
+
+2025-09-13 21:54:33,924 - TeleBot - ERROR - ------------------------------
+2025-09-13 21:54:33,925 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: cannot access local variable 'text' where it is not associated with a value
+2025-09-13 21:54:33,926 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 394, in execute
+    print(text)
+          ^^^^
+UnboundLocalError: cannot access local variable 'text' where it is not associated with a value
+
+2025-09-13 21:56:16,593 - TeleBot - ERROR - ------------------------------
+2025-09-13 21:56:16,593 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: cannot access local variable 'text' where it is not associated with a value
+2025-09-13 21:56:16,595 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 394, in execute
+    print(text)
+          ^^^^
+UnboundLocalError: cannot access local variable 'text' where it is not associated with a value
+
+2025-09-13 21:57:09,146 - TeleBot - ERROR - ------------------------------
+2025-09-13 21:57:09,147 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: cannot access local variable 'text' where it is not associated with a value
+2025-09-13 21:57:09,148 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 394, in execute
+    print(text)
+          ^^^^
+UnboundLocalError: cannot access local variable 'text' where it is not associated with a value
+
+2025-09-13 22:01:06,635 - TeleBot - ERROR - ------------------------------
+2025-09-13 22:01:06,635 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: Field 'id' expected a number but got 'Центр соцобслуживания'.
+2025-09-13 22:01:06,642 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py", line 2117, in get_prep_value
+    return int(value)
+           ^^^^^^^^^^
+ValueError: invalid literal for int() with base 10: 'Центр соцобслуживания'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 407, in execute
+    sch = Schedule.objects.filter(
+          ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/query.py", line 1476, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/query.py", line 1494, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/query.py", line 1501, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 1613, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 1645, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 1559, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 1389, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/lookups.py", line 30, in __init__
+    self.rhs = self.get_prep_lookup()
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/fields/related_lookups.py", line 156, in get_prep_lookup
+    self.rhs = target_field.get_prep_value(self.rhs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py", line 2119, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got 'Центр соцобслуживания'.
+
+2025-09-13 22:02:28,635 - TeleBot - ERROR - ------------------------------
+2025-09-13 22:02:28,635 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: Field 'id' expected a number but got 'Центр соцобслуживания'.
+2025-09-13 22:02:28,644 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py", line 2117, in get_prep_value
+    return int(value)
+           ^^^^^^^^^^
+ValueError: invalid literal for int() with base 10: 'Центр соцобслуживания'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 407, in execute
+    sch = Schedule.objects.filter(
+          ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/query.py", line 1476, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/query.py", line 1494, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/query.py", line 1501, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 1613, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 1645, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 1559, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 1389, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/lookups.py", line 30, in __init__
+    self.rhs = self.get_prep_lookup()
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/fields/related_lookups.py", line 156, in get_prep_lookup
+    self.rhs = target_field.get_prep_value(self.rhs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py", line 2119, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got 'Центр соцобслуживания'.
+
+2025-09-13 22:02:42,100 - TeleBot - ERROR - ------------------------------
+2025-09-13 22:02:42,100 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: Field 'id' expected a number but got 'Центр соцобслуживания'.
+2025-09-13 22:02:42,103 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py", line 2117, in get_prep_value
+    return int(value)
+           ^^^^^^^^^^
+ValueError: invalid literal for int() with base 10: 'Центр соцобслуживания'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 407, in execute
+    sch = Schedule.objects.filter(
+          ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/query.py", line 1476, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/query.py", line 1494, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/query.py", line 1501, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 1613, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 1645, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 1559, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 1389, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/lookups.py", line 30, in __init__
+    self.rhs = self.get_prep_lookup()
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/fields/related_lookups.py", line 156, in get_prep_lookup
+    self.rhs = target_field.get_prep_value(self.rhs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py", line 2119, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got 'Центр соцобслуживания'.
+
+2025-09-13 22:03:52,428 - TeleBot - ERROR - ------------------------------
+2025-09-13 22:03:52,428 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: Field 'id' expected a number but got 'Центр соцобслуживания'.
+2025-09-13 22:03:52,430 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py", line 2117, in get_prep_value
+    return int(value)
+           ^^^^^^^^^^
+ValueError: invalid literal for int() with base 10: 'Центр соцобслуживания'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 407, in execute
+    sch = Schedule.objects.filter(
+          ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/query.py", line 1476, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/query.py", line 1494, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/query.py", line 1501, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 1613, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 1645, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 1559, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 1389, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/lookups.py", line 30, in __init__
+    self.rhs = self.get_prep_lookup()
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/fields/related_lookups.py", line 156, in get_prep_lookup
+    self.rhs = target_field.get_prep_value(self.rhs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py", line 2119, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got 'Центр соцобслуживания'.
+
+2025-09-13 22:04:14,438 - TeleBot - ERROR - ------------------------------
+2025-09-13 22:04:14,438 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: Field 'id' expected a number but got 'Центр соцобслуживания'.
+2025-09-13 22:04:14,442 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py", line 2117, in get_prep_value
+    return int(value)
+           ^^^^^^^^^^
+ValueError: invalid literal for int() with base 10: 'Центр соцобслуживания'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 407, in execute
+    sch = Schedule.objects.filter(
+          ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/query.py", line 1476, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/query.py", line 1494, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/query.py", line 1501, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 1613, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 1645, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 1559, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 1389, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/lookups.py", line 30, in __init__
+    self.rhs = self.get_prep_lookup()
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/fields/related_lookups.py", line 156, in get_prep_lookup
+    self.rhs = target_field.get_prep_value(self.rhs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py", line 2119, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got 'Центр соцобслуживания'.
+
+2025-09-13 22:06:37,374 - TeleBot - ERROR - ------------------------------
+2025-09-13 22:06:37,375 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: '22:12'
+2025-09-13 22:06:37,376 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 394, in execute
+    text += preparing_bus_list(schedule[time], start) + "\n"
+                               ~~~~~~~~^^^^^^
+KeyError: '22:12'
+
+2025-09-13 22:09:27,610 - TeleBot - ERROR - ------------------------------
+2025-09-13 22:09:27,610 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: 'str' object has no attribute 'name'
+2025-09-13 22:09:27,612 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 407, in execute
+    string = f'🚌 Маршрут *"{key_name}"*\nот остановки *"{start.name}"*\nна период *{count}*   ({get_day_string(day)})\n\n'
+                                                          ^^^^^^^^^^
+AttributeError: 'str' object has no attribute 'name'
+
+2025-09-13 22:12:24,127 - TeleBot - ERROR - ------------------------------
+2025-09-13 22:12:24,127 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: 'str' object has no attribute 'name'
+2025-09-13 22:12:24,129 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 407, in execute
+    string = f'🚌 Маршрут *"{key_name}"*\nот остановки *"{start.name}"*\nна период *{count}*   ({get_day_string(day)})\n\n'
+                                                          ^^^^^^^^^^
+AttributeError: 'str' object has no attribute 'name'
+
+2025-09-13 16:13:15,895 - TeleBot - ERROR - ------------------------------
+2025-09-13 16:13:15,895 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: 'str' object has no attribute 'name'
+2025-09-13 16:13:15,896 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 407, in execute
+    string = f'🚌 Маршрут *"{key_name}"*\nот остановки *"{start.name}"*\nна период *{count}*   ({get_day_string(day)})\n\n'
+                                                          ^^^^^^^^^^
+AttributeError: 'str' object has no attribute 'name'
+
+2025-09-13 16:15:03,041 - TeleBot - ERROR - ------------------------------
+2025-09-13 16:15:03,041 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: 'str' object has no attribute 'name'
+2025-09-13 16:15:03,043 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 407, in execute
+    string = f'🚌 Маршрут *"{key_name}"*\nот остановки *"{start.name}"*\nна период *{count}*   ({get_day_string(day)})\n\n'
+                                                          ^^^^^^^^^^
+AttributeError: 'str' object has no attribute 'name'
+
+2025-09-13 16:19:58,546 - TeleBot - ERROR - ------------------------------
+2025-09-13 16:19:58,546 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: 'str' object has no attribute 'name'
+2025-09-13 16:19:58,548 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 408, in execute
+    string = f'🚌 Маршрут *"{key_name}"*\nот остановки *"{start.name}"*\nна период *{count}*   ({get_day_string(day)})\n\n'
+                                                          ^^^^^^^^^^
+AttributeError: 'str' object has no attribute 'name'
+
+2025-09-13 16:21:11,005 - TeleBot - ERROR - ------------------------------
+2025-09-13 16:21:11,005 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: 'str' object has no attribute 'name'
+2025-09-13 16:21:11,008 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 408, in execute
+    string = f'🚌 Маршрут *"{key_name}"*\nот остановки *"{start.name}"*\nна период *{count}*   ({get_day_string(day)})\n\n'
+                                                          ^^^^^^^^^^
+AttributeError: 'str' object has no attribute 'name'
+
+2025-09-13 16:22:37,524 - TeleBot - ERROR - ------------------------------
+2025-09-13 16:22:37,524 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: 'str' object has no attribute 'name'
+2025-09-13 16:22:37,526 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 408, in execute
+    string = f'🚌 Маршрут *"{key_name}"*\nот остановки *"{start.name}"*\nна период *{count}*   ({get_day_string(day)})\n\n'
+                                                          ^^^^^^^^^^
+AttributeError: 'str' object has no attribute 'name'
+
+2025-09-13 13:24:14,315 - TeleBot - ERROR - ------------------------------
+2025-09-13 13:24:14,315 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: 'str' object has no attribute 'name'
+2025-09-13 13:24:14,317 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 408, in execute
+    string = f'🚌 Маршрут *"{key_name}"*\nот остановки *"{start.name}"*\nна период *{count}*   ({get_day_string(day)})\n\n'
+                                                          ^^^^^^^^^^
+AttributeError: 'str' object has no attribute 'name'
+
+2025-09-13 13:00:08,468 - TeleBot - ERROR - ------------------------------
+2025-09-13 13:00:08,469 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: 'str' object has no attribute 'name'
+2025-09-13 13:00:08,470 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 408, in execute
+    string = f'🚌 Маршрут *"{key_name}"*\nот остановки *"{start.name}"*\nна период *{count}*   ({get_day_string(day)})\n\n'
+                                                          ^^^^^^^^^^
+AttributeError: 'str' object has no attribute 'name'
+
+2025-09-14 05:22:13,735 - TeleBot - ERROR - ------------------------------
+2025-09-14 05:22:13,736 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: 'str' object has no attribute 'name'
+2025-09-14 05:22:13,739 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 420, in execute
+    string = f'🚌 Маршрут *"{key_name}"*\nот остановки *"{start.name}"*\nна период *{count}*   ({get_day_string(day)})\n\n'
+                                                          ^^^^^^^^^^
+AttributeError: 'str' object has no attribute 'name'
+
+2025-09-16 12:11:33,683 - TeleBot - ERROR - ------------------------------
+2025-09-16 12:11:33,683 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: name 'router' is not defined
+2025-09-16 12:11:33,687 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 349, in execute
+    route_name = f"{router.start.name} - {router.end.name}"
+                    ^^^^^^
+NameError: name 'router' is not defined. Did you mean: 'MyRouter'?
+
+2025-09-16 12:22:09,577 - TeleBot - ERROR - ------------------------------
+2025-09-16 12:22:09,578 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: cannot unpack non-iterable Bus object
+2025-09-16 12:22:09,579 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 346, in execute
+    for bus, routers in schedule:
+        ^^^^^^^^^^^^
+TypeError: cannot unpack non-iterable Bus object
+
+2025-09-16 12:22:10,007 - TeleBot - ERROR - ------------------------------
+2025-09-16 12:22:10,007 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: cannot unpack non-iterable Bus object
+2025-09-16 12:22:10,008 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 346, in execute
+    for bus, routers in schedule:
+        ^^^^^^^^^^^^
+TypeError: cannot unpack non-iterable Bus object
+
+2025-09-16 13:12:01,716 - TeleBot - ERROR - ------------------------------
+2025-09-16 13:12:01,716 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: unhashable type: 'list'
+2025-09-16 13:12:01,718 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 344, in execute
+    schedule = full_schedule(start, week.index(self.key_name) + 1)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/schedule/services/full_schedule.py", line 78, in full_schedule
+    final_schedule[bus][list(routers)] = times
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+TypeError: unhashable type: 'list'
+
+2025-09-16 13:14:49,044 - TeleBot - ERROR - ------------------------------
+2025-09-16 13:14:49,044 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: sequence item 0: expected str instance, Router found
+2025-09-16 13:14:49,046 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 353, in execute
+    print(' ', ', '.join([router for router in routers]))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: sequence item 0: expected str instance, Router found
+
+2025-09-16 13:18:16,386 - TeleBot - ERROR - ------------------------------
+2025-09-16 13:18:16,386 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: sequence item 0: expected str instance, Router found
+2025-09-16 13:18:16,389 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 353, in execute
+    print(' ', ', '.join([router for router in routers]))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: sequence item 0: expected str instance, Router found
+
+2025-09-16 19:02:36,159 - TeleBot - ERROR - ------------------------------
+2025-09-16 19:02:36,160 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: message is too long
+2025-09-16 19:02:36,193 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 412, in execute
+    self.bot.send_message(self.message.chat.id, text, parse_mode='Markdown')
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/telebot/__init__.py", line 1742, in send_message
+    apihelper.send_message(
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/telebot/apihelper.py", line 270, in send_message
+    return _make_request(token, method_url, params=payload, method='post')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/telebot/apihelper.py", line 167, in _make_request
+    json_result = _check_result(method_name, result)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/telebot/apihelper.py", line 194, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: message is too long
+
+2025-09-16 19:04:43,655 - TeleBot - ERROR - ------------------------------
+2025-09-16 19:04:43,655 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: message is too long
+2025-09-16 19:04:43,661 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 412, in execute
+    self.bot.send_message(self.message.chat.id, text, parse_mode='Markdown')
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/telebot/__init__.py", line 1742, in send_message
+    apihelper.send_message(
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/telebot/apihelper.py", line 270, in send_message
+    return _make_request(token, method_url, params=payload, method='post')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/telebot/apihelper.py", line 167, in _make_request
+    json_result = _check_result(method_name, result)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/telebot/apihelper.py", line 194, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: message is too long
+
+2025-09-16 19:06:20,413 - TeleBot - ERROR - ------------------------------
+2025-09-16 19:06:20,414 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: message is too long
+2025-09-16 19:06:20,420 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 413, in execute
+    self.bot.send_message(self.message.chat.id, text, parse_mode='Markdown')
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/telebot/__init__.py", line 1742, in send_message
+    apihelper.send_message(
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/telebot/apihelper.py", line 270, in send_message
+    return _make_request(token, method_url, params=payload, method='post')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/telebot/apihelper.py", line 167, in _make_request
+    json_result = _check_result(method_name, result)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/telebot/apihelper.py", line 194, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: message is too long
+
+2025-09-16 19:31:16,145 - TeleBot - ERROR - ------------------------------
+2025-09-16 19:31:16,146 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: cannot access local variable 'schedule' where it is not associated with a value
+2025-09-16 19:31:16,148 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 355, in execute
+    for bus, routers_times in schedule.items():
+                              ^^^^^^^^
+UnboundLocalError: cannot access local variable 'schedule' where it is not associated with a value
+
+2025-09-16 19:36:05,691 - TeleBot - ERROR - ------------------------------
+2025-09-16 19:36:05,691 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: 'rout'
+2025-09-16 19:36:05,693 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 324, in execute
+    key_name = self.other_fields['rout']
+               ~~~~~~~~~~~~~~~~~^^^^^^^^
+KeyError: 'rout'
+
+2025-09-16 19:37:53,958 - TeleBot - ERROR - ------------------------------
+2025-09-16 19:37:53,958 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: cannot access local variable 'schedule' where it is not associated with a value
+2025-09-16 19:37:53,960 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 355, in execute
+    for bus, routers_times in schedule.items():
+                              ^^^^^^^^
+UnboundLocalError: cannot access local variable 'schedule' where it is not associated with a value
+
+2025-09-17 20:07:45,947 - TeleBot - ERROR - ------------------------------
+2025-09-17 20:07:45,947 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: BusStop matching query does not exist.
+2025-09-17 20:07:45,950 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 132, in callback_inline
+    globals()[class_name](bot, user, call, action=action)
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 66, in __init__
+    self.answer = self.execute()  # Выполняем действие и получаем ответ что делали
+                  ^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 578, in execute
+    buses = self.make_bus_list_by_buss(self.other_fields['favorites']['start'])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/tbot/services/executors.py", line 468, in make_bus_list_by_buss
+    bus_stop = BusStop.objects.get(external_id=busstop_id)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/venv/lib/python3.12/site-packages/django/db/models/query.py", line 649, in get
+    raise self.model.DoesNotExist(
+schedule.models.BusStop.DoesNotExist: BusStop matching query does not exist.
+
+2025-09-18 16:28:15,853 - TeleBot - ERROR - ------------------------------
+2025-09-18 16:28:15,853 - TeleBot - ERROR - Произошла ошибка для пользователя 249503190: 'finish_name'
+2025-09-18 16:28:15,856 - TeleBot - ERROR - Traceback (most recent call last):
+  File "/home/avdivo/python/nearest_bus/tbot/views.py", line 148, in echo_message
+    menu(bot, message)
+  File "/home/avdivo/python/nearest_bus/tbot/services/menu.py", line 136, in menu
+    bot.send_message(message.chat.id, answer_to_alisa(request_body))
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/alisa/services/talk_to_alisa.py", line 226, in answer_to_alisa
+    return say_schedule(out[0], out[1])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/alisa/services/talk_to_alisa.py", line 88, in say_schedule
+    schedule = answer_by_two_busstop(start, end)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/schedule/services/timestamp.py", line 197, in answer_by_two_busstop
+    found_routes = route_analysis(start_stop_name, finish_stop_name)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/avdivo/python/nearest_bus/schedule/services/timestamp.py", line 94, in route_analysis
+    finish_list = names["finish_name"]  # Получаем остановки из групп
+                  ~~~~~^^^^^^^^^^^^^^^
+KeyError: 'finish_name'
+

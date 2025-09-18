@@ -86,7 +86,10 @@ def answer_to_alisa(request_body):
             # Формат возвращаемого словаря в файле
             # "Логика поиска остановок и автобусов на них.txt"
             schedule = answer_by_two_busstop(start, end)
+        except ValueError as e:
+            return str(e)
         except:
+            raise
             # Если остановка не найдена, то выводим сообщение и завершаем действие
             return (f'Между остановками {start} и {end} нет прямого автобуса. '
                     f'Пожалуйста, выберите другой маршрут.')
