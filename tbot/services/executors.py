@@ -393,19 +393,23 @@ class MyRouter(Executor):
                 time_now = date_now().time()  # Получаем текущее время в нужном часовом поясе
                 # Перебираем полученные временные метки
                 gen = time_generator(list(schedule), time_now, delta[count])
-                text = ""
+                rout = ""
+                if  f"{start} - {finish}" != key_name:
+                    rout = f'("{start}" - "{finish}")\n'
+                text = f'🔄  Маршрут "{key_name}"\n{rout}Автобусы на период {count} ({week[day]})\n\n'
+                text_list = ""
                 for time in gen:
                     # Готовим словарь для вывода
                     time_str = time.strftime("%H:%M")  # Время отправления автобуса (str)
-                    text += f'{time_str} - '  # Надцать часов минут
+                    text_list += f'⌚ {time_str}     '  # Надцать часов минут
 
                     # Подготовка списка автобусов
-                    text += "Автобус №" + preparing_bus_list(schedule[time], start)
-                if not text:
-                    text = f'⚠️ Нет автобусов на период - *{count}*.\n'
+                    text_list += "Автобус №" + preparing_bus_list(schedule[time], start)
+                if not text_list:
+                    text_list = f'⚠️ Нет автобусов на период - *{count}*.'
 
                 # Отправляем расписание
-                self.bot.send_message(self.message.chat.id, text, parse_mode='Markdown')
+                self.bot.send_message(self.message.chat.id, text + text_list, parse_mode='Markdown')
 
             # Формируем клавиатуру для дополнительных действий
             self.kb_wait = [self.keyboard(f'📆 Полное расписание:', week, row=7)]
