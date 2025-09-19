@@ -237,13 +237,10 @@ class ExeAddBusStop(Executor):
 
             # Сохраняем параметры
             self.other_fields['finish'] = finish_name
-            # Список автобусов которые будут сохранены как выбранные
-            self.other_fields['check'] = select_buses
 
             # Сохраняем маршрут в Избранное (favorites)
             save = json.loads(self.user.parameter.favorites)
-            save[name] = {'start': self.other_fields['start'], 'finish': self.other_fields['finish'],
-                          'check': self.other_fields['check']}
+            save[name] = {'start': self.other_fields['start'], 'finish': self.other_fields['finish']}
             self.user.parameter.favorites = json.dumps(save, ensure_ascii=False)
             self.user.parameter.save()
             answer = f'{self.__class__.__name__} - {self.stage}'

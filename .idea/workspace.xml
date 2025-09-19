@@ -5,11 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3ec048dd-bcb6-46d2-b5d0-2123160c74ff" name="Changes" comment="Переход на VSC">
-      <change beforePath="$PROJECT_DIR$/docs/full_schedule.txt" beforeDir="false" afterPath="$PROJECT_DIR$/docs/full_schedule.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/schedule/services/full_schedule.py" beforeDir="false" afterPath="$PROJECT_DIR$/schedule/services/full_schedule.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tbot/services/executors.py" beforeDir="false" afterPath="$PROJECT_DIR$/tbot/services/executors.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tbot/services/menu.py" beforeDir="false" afterPath="$PROJECT_DIR$/tbot/services/menu.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tbot/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/tbot/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/log.tmp" beforeDir="false" afterPath="$PROJECT_DIR$/log.tmp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

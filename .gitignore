@@ -1,0 +1,9 @@
+.env
+.env_server
+db.sqlite3
+db.zip
+db_old.zip
+db_test.sqlite3
+telebot.log
+tbot/services/__pycache__/executors.cpython-312.pyc
+venv
