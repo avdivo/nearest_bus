@@ -395,7 +395,7 @@ class MyRouter(Executor):
                 gen = time_generator(list(schedule), time_now, delta[count])
                 rout = ""
                 if  f"{start} - {finish}" != key_name:
-                    rout = f'("{start}" - "{finish}")\n'
+                    rout = f'("{start}" ⟶ "{finish}")\n'
                 text = f'🔄  Маршрут "{key_name}"\n{rout}Автобусы на период {count} ({week[day]})\n\n'
                 text_list = ""
                 for time in gen:
