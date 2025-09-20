@@ -7,6 +7,7 @@ from typing import Dict, List, Any
 
 from tbot.services.functions import date_now
 from schedule.models import BusStop, Bus, Router, Order, Schedule, Holiday, StopGroup
+from .functions import format_bus_number
 
 
 def time_generator(time_marks, start_time, duration) -> list:
@@ -377,7 +378,7 @@ def preparing_bus_list(buses, name_start) -> str:
     # Разбираем имеющиеся автобусы на это время
     for bus_dict in buses:
         bus = bus_dict['bus']  # Автобус (str)
-        bus_number = re.sub(r'([a-zA-Zа-яА-Я]+)', r"'\1'", bus.number)
+        bus_number = format_bus_number(bus.number)  # Буквы в кавычки
         modifiers = bus_dict.get('modifier', [])  # Модификатор ответа см. в документации
         add_text = ''
 

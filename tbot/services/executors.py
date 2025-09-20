@@ -8,17 +8,17 @@ import string
 import logging
 from telebot import types
 from datetime import datetime
-from functools import cmp_to_key
 
 from django.conf import settings
 
 from tbot.models import IdsForName
-from schedule.models import BusStop, Schedule, Holiday, StopGroup
+from schedule.models import BusStop, Holiday, StopGroup
 from schedule.services.timestamp import route_analysis, time_generator, preparing_bus_list, answer_by_two_busstop
-from utils.translation import get_day_string, get_day_number
-from utils.sorted_buses import compare_name, sorted_buses
+from utils.sorted_buses import sorted_buses
 from tbot.services.functions import date_now
 from schedule.services.full_schedule import full_schedule
+from schedule.services.functions import format_bus_number
+
 
 logger = logging.getLogger('alisa')
 
@@ -343,7 +343,7 @@ class MyRouter(Executor):
                         bus_content += "\n\n"
 
                     # Добавляем номер автобуса.
-                    bus_content += "🚌 №" + bus.number
+                    bus_content += "🚌 №" + format_bus_number(bus.number)  # Буквы в кавычках
                     # Добавляем информацию о маршрутах и времени.
                     for routers, times in routers_times.items():
                         bus_content += "\n" + ', '.join([f"*{router.start.name} - {router.end.name}*" for router in routers[:-1]])
