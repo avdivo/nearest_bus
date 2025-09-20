@@ -8,13 +8,14 @@ from tbot.models import BotUser
 class AlisaUser(models.Model):
     """Таблица связывает аккаунты Телеграмм бота с устройствами Алисы."""
     user = models.ForeignKey(BotUser, null=True, on_delete=models.SET_NULL, verbose_name='Пользователь')
+    user_name = models.CharField(verbose_name = 'Обращение к пользователю', max_length=100, default=None, blank=True, null=True)
     application_id = models.CharField(verbose_name='Идентификатор приложения с Алисой', max_length=100)
     parameters = models.TextField(verbose_name='Память приложения в JSON', default='{}')
     last_update = models.DateTimeField(verbose_name='Последнее обновление', default=None, blank=True, null=True)
     action_count = models.IntegerField(verbose_name='Количество всех действий', default=0)
     schedule_count = models.IntegerField(verbose_name='Количество запросов расписаний', default=0)
 
-    @ staticmethod
+    @staticmethod
     def authorize(application_id):
         """Метод для авторизации пользователя по application_id."""
         user = AlisaUser.objects.filter(application_id=application_id).first()

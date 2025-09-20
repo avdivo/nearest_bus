@@ -263,7 +263,7 @@ class StopGroup(models.Model):
     """Группы остановок. Хранят остановки в json
     [name1, name2, ...]"""
 
-    list_name = models.CharField('Остановки', max_length=100)
+    list_name = models.CharField('Остановки', max_length=300)
 
     class Meta:
         verbose_name = 'Группа остановок назначения'
