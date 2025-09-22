@@ -1,5 +1,4 @@
-import colorlog
-import re, os, json
+import re
 from time import sleep, time
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -12,8 +11,8 @@ from import_schedule.import_schedule import (calculate_md5_from_dict,
                                              save_bus, merge_json_files)
 
 # Если нужно создать сводный файл, но не парсить
-# merge_json_files()
-# exit(0)
+merge_json_files()
+exit(0)
 
 """
 Пустой ввод - все расписание

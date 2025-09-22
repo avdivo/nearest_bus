@@ -1,9 +1,7 @@
 import logging
 import hashlib
 import colorlog
-import functools
 import re, os, json
-from time import sleep, time
 from functools import cmp_to_key
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -34,41 +32,6 @@ handler.setFormatter(formatter)
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 logger.handlers = [handler]  # Заменяем обработчики, чтобы избежать дублирования
-
-
-# def final_station(string):
-#     """Создает списки конечных остановок и Направлений.
-#     Принимает список направлений (через тире), создает список из названий отделенных тире.
-#     Каждый раз сохраняет списки.
-#     """
-#     data_final = []
-#     file_final = 'final.json'
-#     if os.path.exists(file_final):
-#         with open(file_final, "r") as file:
-#             data_final = json.load(file)
-#     data_direction = []
-#     file_direction = 'direction.json'
-#     if os.path.exists(file_direction):
-#         with open(file_direction, "r") as file:
-#             data_direction = json.load(file)
-#
-#     bs_list = []
-#     dir_list = []
-#     for s in string:
-#         if not s:
-#             continue
-#         dir_list.append(s)
-#         for bs in s.split(' - '):
-#             out = bs.strip()
-#             if out:
-#                 bs_list.append(out)
-#
-#     data = set(data_final).union(set(bs_list))
-#     with open(file_final, "w") as file:
-#         json.dump(list(data), file, ensure_ascii=False, indent=4)
-#     data = set(data_direction).union(set(dir_list))
-#     with open(file_direction, "w") as file:
-#         json.dump(list(data), file, ensure_ascii=False, indent=4)
 
 def get_schedule(driver):
     """Получение расписания.
@@ -192,44 +155,6 @@ def get_direction_and_bus_stop(driver):
             break  # Когда секции закончились
 
     return result
-
-    # # Списки остановок
-    # string = 'ABCDEF'
-    # for i, direction in enumerate(directions):
-    #     # logger.info(f"Маршрут {direction}")
-    #     # Полный список остановок на маршруте
-    #     bus_stops = len(driver.find_elements(By.XPATH, f'//*[@id="trip{string[i]}"]/a[*]')) + 1
-    #     bus_stop_i = 1
-    #     # Перебираем остановки кликаем на каждой для открытия расписания
-    #     out = dict()  # Часть возвращаемого словаря
-    #     while bus_stops - bus_stop_i:
-    #         repeat = False
-    #         while not repeat:
-    #             try:
-    #                 bus_stop = driver.find_elements(By.XPATH, f'//*[@id="trip{string[i]}"]/a[{bus_stop_i}]')
-    #                 bus_stop_name = bus_stop[0].text
-    #
-    #                 # Перемотка к нужному элементу
-    #                 driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", bus_stop[0])
-    #
-    #                 # Ожидание элемента
-    #                 WebDriverWait(driver, 5).until(EC.element_to_be_clickable(bus_stop[0]))
-    #                 bus_stop[0].click()
-    #                 # sleep(0.2)
-    #                 bus_stop_id = driver.current_url.split('/')[-2]  # Уникальный номер остановки (id)
-    #                 get = get_days_and_time(driver)  # Вызов функции получения расписаний
-    #                 repeat = True
-    #             except Exception as e:
-    #                 logger.warning(f"Ошибка. Повтор.")
-    #                 repeat = False
-    #
-    #         bus_stop_i += 1
-    #         out[bus_stop_name] = {'id': bus_stop_id, 'schedule': get}
-    #
-    #     res[direction] = out  # Заполняем данные для возврата
-    #
-    # return res
-
 
 def calculate_md5_from_dict(data: dict) -> str:
     """Получение хэша md5 из словаря"""
