@@ -23,7 +23,9 @@
 
 Загрузить      - git clone
 Миграция       - python manage.py migrate
+Замена .env    - скопировать
 Исправление БД - python manage.py migrate_favorites.py
 Импорт         - python manage.py import
 Запуск         - python manage.py runserver
-Создание групп
+Запись имен    - в админке
+Создание групп - в админке
