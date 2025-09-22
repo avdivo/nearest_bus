@@ -1,26 +1,29 @@
 # Модуль принимает запросы от сервиса Яндекс.Диалоги и возвращает ответы.
 # Реализует функции навыка Слуцкие автобусы.
-
-import re
 import random
 from datetime import datetime, timedelta
 
 from django.utils import timezone
 from schedule.models import BusStop, OptionsForStopNames
 
-from alisa.services.functions import authorize, date_now
+from alisa.services.functions import date_now, authorize
 from alisa.services.analizer import select_samples_by_phrase
 from schedule.services.timestamp import answer_by_two_busstop, preparing_bus_list
 
+from alisa.services.greetings import greetings
 
-def answer_to_alisa(request_body):
+
+def answer_to_alisa(request_body, user = None):
     """Функция получает все сообщения от Алисы. Или от ТГ. Определяет их статус и выполняет
     действия в соответствии с ним.
     Принимая запрос от ТГ обрабатывает его так же, как от Алисы (не подозревая о подмене),
     при этом в request_body должны приходить нужные данные:
     request_body['session']['application']['application_id'] - идентификатор устройства (для тг свой идентификатор)
     request_body['request']['original_utterance'] - текст запроса.
-    Принимает тело запроса от Алисы или ТГ."""
+    Принимает тело запроса от Алисы или ТГ.
+    user - объект пользователя Алисы, если не передан, то пределяется в программе
+    """
+
     current_timezone = timezone.get_current_timezone()
 
     def datetime_bus(time) -> datetime:
@@ -124,10 +127,11 @@ def answer_to_alisa(request_body):
             'Я понимаю названия остановок или команды, к сожалению не поняла вас.',
         ])
 
-    # Авторизация пользователя
-    user = authorize(request_body)
-    if not user:
-        return
+    # Если пользователь не определен (из ТГ) авторизуем
+    if user is None:
+        user = authorize(request_body)
+        if not user:
+            return
 
     # Составим список остановок без повторений, в алфавитном порядке
     stops = BusStop.get_all_bus_stops_names()

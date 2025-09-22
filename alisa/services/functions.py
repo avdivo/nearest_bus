@@ -28,12 +28,17 @@ def authorize(request_body) -> AlisaUser:
         return None  # Если нет application_id, то возвращаем None
 
     user = AlisaUser.objects.filter(application_id=application_id).first()
-    if not user:
+    if user:
+        user.refresh_from_db()
+    else:
         # Добавляем пользователя в БД
         user = AlisaUser.objects.create(application_id=application_id)
-        user.save()
+    
+    # Сохраняем старую дату в временное свойство, которое не будет сохранено в БД
+    user.previous_last_update = user.last_update
     user.last_update = date_now()
     user.action_count += 1
     user.save()
+
     return user
 

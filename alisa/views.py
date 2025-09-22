@@ -4,8 +4,10 @@ import logging
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
-from .services.talk_to_alisa import answer_to_alisa
 from utils.telegram_handler import Messages
+from .services.talk_to_alisa import answer_to_alisa
+from alisa.services.functions import authorize
+from alisa.services.greetings import greetings
 
 
 # Настройка логгера c именем 'alisa' для отправки сообщений в ТГ
@@ -21,12 +23,18 @@ def alisa(request):
     to_telegram = True  # Выводить логи в Телеграмм
     # print(json.dumps(request_body, indent=4, ensure_ascii=False))
 
+    # Авторизация пользователя
+    user = authorize(request_body)
+    if not user:
+        return
+    
     # Если это начало сессии просто приветствие
     new = request_body['session']['new']
     if new:
         if request_body['request']['original_utterance'] == 'ping':
             to_telegram = False
-        text = 'Откуда и куда вы хотите ехать?'
+        print()
+        text = greetings(user)  # Текст приветствия
     else:
         text = answer_to_alisa(request_body)
 

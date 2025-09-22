@@ -396,7 +396,8 @@ class MyRouter(Executor):
                 rout = ""
                 if  f"{start} - {finish}" != key_name:
                     rout = f'("{start}" ⟶ "{finish}")\n'
-                text = f'🔄  Маршрут "{key_name}"\n{rout}Автобусы на период {count} ({week[day]})\n\n'
+                print(day, "--------------------------")
+                text = f'🔄  Маршрут "{key_name}"\n{rout}Автобусы на период {count} ({week[day-1]})\n\n'
                 text_list = ""
                 for time in gen:
                     # Готовим словарь для вывода
