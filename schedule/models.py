@@ -256,9 +256,10 @@ class Holiday(models.Model):
         verbose_name_plural = 'Праздники'
 
 
-# Группировка для остановок прибытия,
+# Группировка для остановок,
 # чтобы можно было указать группу остановок,
-# куда еще можно поехать, чтобы попасть в нужное место.
+# откуда можно отправиться или приехать. 
+# Т.е. рядома расположенные остановки.
 class StopGroup(models.Model):
     """Группы остановок. Хранят остановки в json
     [name1, name2, ...]"""
@@ -266,8 +267,8 @@ class StopGroup(models.Model):
     list_name = models.CharField('Остановки', max_length=300)
 
     class Meta:
-        verbose_name = 'Группа остановок назначения'
-        verbose_name_plural = 'Группы остановок назначения'
+        verbose_name = 'Группа остановок'
+        verbose_name_plural = 'Группы остановок'
 
     @staticmethod
     def get_group_by_stop_name(start_name: str, finish_name: str = None) -> Dict[str, List[str]]:
