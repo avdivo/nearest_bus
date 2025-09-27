@@ -99,13 +99,20 @@ def route_analysis(start_stop_name: str, finish_stop_name: str) -> List:
     start_objects = list(BusStop.objects.filter(name__in=start_list))
     finish_objects = list(BusStop.objects.filter(name__in=finish_list))
 
+    # Объект главной остановки отправления, та что с заданным названием
+    start_main = start_objects[0]
+    for s in start_objects:
+        if s.name == start_stop_name:
+            start_main = s
+
     # print(start_objects)
     # print(finish_objects)
 
     # 3 --------------------------------
     # Получаем все маршруты для автобусов, проходящих через начальные остановки.
     # ВАЖНО: Реализовано без оптимизации (с циклами) для целей тестирования.
-    bus_to_stops = {}
+    # Время обработки не вызывает необходимомти оптимизации.
+    bus_to_stops = {}  # Словарь автобусов со всеми маршрутами (перечисление остановок)
     all_buses = Bus.objects.filter(routers__orders_for_router__bus_stop__in=start_objects).distinct()
 
     for bus in all_buses:
@@ -117,14 +124,23 @@ def route_analysis(start_stop_name: str, finish_stop_name: str) -> List:
         bus_to_stops[bus] = bus_parts
 
     # for part, it in bus_to_stops.items():
-    #     print(part, "\n", it, "\n")
+    #     print(part, "\n")
+    #     for i in it:
+    #         print(i)
+    #     print()
 
     # 4 --------------------------------
     # Итерация, создание пар и анализ маршрутов.
     # Сначала собираем ВСЕ возможные маршруты в `found_routes`, а в шаге 5 фильтруем.
-    found_routes = []
+    found_routes = []  # Основной список маршрутов
     for bus, parts in bus_to_stops.items():
         # Перебираем автобусы и части маршрута (туда и обратно)
+        
+        # --------------------------------------------------
+        # Отсеиваем остановки отправления для одного автобуса (docs/best_router.txt)
+        bus_founf_routers = []  # Маршруты которые добавятся для этого автобуса (временный список)
+        index_in_router = 0  # Лучший и единственный индекс в маршруте для автобуса
+        best_index = None  # Индекс последней остановки в маршруте из группы отправления или 1000
         for start_bus_stop, finish_bus_stop in itertools.product(start_objects, finish_objects):
             # Перебираем комбинации остановок
 
@@ -161,13 +177,30 @@ def route_analysis(start_stop_name: str, finish_stop_name: str) -> List:
                         finish_index = part.index(finish_bus_stop)
                         if start_index < finish_index:
                             priority = 1
+                            print('---------------', bus)
+                            # Поиск последней остановки в маршруте из группы отправления
+                            # Сохраняем индексы остановок отправления, которые есть в маршруте
+                            common = [(stop, idx) for idx, stop in enumerate(part) if stop in start_objects]
+                            if len(common) >= 2:
+                                # Отвев остановок отправления (docs/best_router.txt)
+                                if start_bus_stop == start_main:
+                                    # Остановка отправления главная найдена
+                                    best_index = 1000
+                                    break
+
+                                # Находим ту, которая встречается последней (по индексу)
+                                last_stop = max(common, key=lambda x: x[1])[0]
+                                if last_stop > index_in_router:
+                                    index_in_router = last_stop  # Пока лучший маршрут с приоритетом 1
+                                    best_index = len(bus_founf_routers)  # Он во временной списке маршрутов 
                             break
                     except ValueError:
                         continue
 
+            # Добавляем маршрут во временный список
             if priority < 4 and analysis_part:
-                # Приоритеты высокие - формируем ответ
-                found_routes.append({
+                # Приоритеты выше 4 - формируем ответ
+                bus_founf_routers.append({
                     "priority": priority,
                     "bus": bus,
                     "start": start_bus_stop,
@@ -176,13 +209,27 @@ def route_analysis(start_stop_name: str, finish_stop_name: str) -> List:
                     "final_stop_finish": analysis_part[-1],
                 })
 
+            if best_index == 1000:
+                # Найден лучший маршрут
+                break
+
+        if best_index is not None:
+            # Выбран лучший маршрут, оставляем тольуо его
+            if best_index == 1000:
+                bus_founf_routers = [bus_founf_routers[-1]]  # Последний в списке
+            else:
+                bus_founf_routers = [bus_founf_routers[best_index]]
+        
+        # Сохраняем маршруты в основной список
+        found_routes += bus_founf_routers
+
     # Сохраняей вывод в файл
     with open('log.tmp', 'w', encoding='utf-8') as f:
+        print(found_routes)
         for item in found_routes:
             for k in item.items():
                 print(k, file=f)
             print(file=f)
-
 
     return found_routes
 
