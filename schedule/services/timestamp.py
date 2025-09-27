@@ -142,6 +142,7 @@ def route_analysis(start_stop_name: str, finish_stop_name: str) -> List:
         index_in_router = 0  # Лучший и единственный индекс в маршруте для автобуса
         best_index = None  # Индекс последней остановки в маршруте из группы отправления или 1000
         for start_bus_stop, finish_bus_stop in itertools.product(start_objects, finish_objects):
+
             # Перебираем комбинации остановок
 
             # Есть ли остановка прибытия в маршруте
@@ -177,7 +178,7 @@ def route_analysis(start_stop_name: str, finish_stop_name: str) -> List:
                         finish_index = part.index(finish_bus_stop)
                         if start_index < finish_index:
                             priority = 1
-                            print('---------------', bus)
+
                             # Поиск последней остановки в маршруте из группы отправления
                             # Сохраняем индексы остановок отправления, которые есть в маршруте
                             common = [(stop, idx) for idx, stop in enumerate(part) if stop in start_objects]
@@ -224,12 +225,11 @@ def route_analysis(start_stop_name: str, finish_stop_name: str) -> List:
         found_routes += bus_founf_routers
 
     # Сохраняей вывод в файл
-    with open('log.tmp', 'w', encoding='utf-8') as f:
-        print(found_routes)
-        for item in found_routes:
-            for k in item.items():
-                print(k, file=f)
-            print(file=f)
+    # with open('log.tmp', 'w', encoding='utf-8') as f:
+    #     for item in found_routes:
+    #         for k in item.items():
+    #             print(k, file=f)
+    #         print(file=f)
 
     return found_routes
 
