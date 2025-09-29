@@ -232,12 +232,12 @@ def answer_by_two_busstop(start_stop_name: str, finish_stop_name: str) -> Dict:
         else:
             report[start_bus_stop]['buses'].update(bus_info)
 
-    # for k, v in report.items():
-    #     print("--- ", k, "\n")
+    # for bus_stop, v in report.items():
+    #     print("--- ", bus_stop, "\n")
     #     print("priority:", v["priority"])
-    #     for i, j in v["buses"].items():
-    #         print(i)
-    #         print(j, "\n")
+    #     for bus_out, route_info in v["buses"].items():
+    #         print(bus_out)
+    #         print(route_info, "\n")
 
     # 6 --------------------------------
     # Создаем словарь timestamp с расписанием.
