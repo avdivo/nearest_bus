@@ -8,9 +8,13 @@ from typing import Dict, List, Any
 from tbot.services.functions import date_now
 from schedule.models import BusStop, Bus, Router, Order, Schedule, Holiday, StopGroup
 from .functions import format_bus_number
+from .best_router import BestRoute
+from .filter import Filter
 
+import sys
+import traceback
 
-def time_generator(time_marks, start_time, duration) -> list:
+def time_generator(time_marks, start_time, duration):
     """Генератор временных меток, возвращающий временные метки из списка.
     Принимает список временных меток, стартовое время и продолжительность в минутах.
     Возвращает временные метки из списка, начиная со стартового времени, пока не пройдет
@@ -81,6 +85,8 @@ def route_analysis(start_stop_name: str, finish_stop_name: str) -> List:
                 "finish": finish_bus_stop,                  (остановка прибытия)
                 "final_stop_start": analysis_part[0],       (конечная, откуда едет)
                 "final_stop_finish": analysis_part[-1],     (конечная, куда едет)
+                "part": part                                (часть маршрута, откуда едет)
+                "score": score                              (баллы маршрута)
             }
         ]
 
@@ -116,15 +122,22 @@ def route_analysis(start_stop_name: str, finish_stop_name: str) -> List:
             bus_parts.append([order.bus_stop for order in part_orders])
         bus_to_stops[bus] = bus_parts
 
-    # for part, it in bus_to_stops.items():
-    #     print(part, "\n", it, "\n")
+    # for bus, parts in bus_to_stops.items():
+    #     # print(bus, "\n", parts, "\n")
+    #     print(bus)
+    # print()
 
     # 4 --------------------------------
     # Итерация, создание пар и анализ маршрутов.
-    # Сначала собираем ВСЕ возможные маршруты в `found_routes`, а в шаге 5 фильтруем.
+    # Объект для фильтрации и накопления маршрутов
+    filter_routes = Filter()
+
     found_routes = []
     for bus, parts in bus_to_stops.items():
         # Перебираем автобусы и части маршрута (туда и обратно)
+        # Создание объекта поиска маршрутов
+        route_search = BestRoute(parts, start_stop_name, finish_stop_name)
+
         for start_bus_stop, finish_bus_stop in itertools.product(start_objects, finish_objects):
             # Перебираем комбинации остановок
 
@@ -132,49 +145,30 @@ def route_analysis(start_stop_name: str, finish_stop_name: str) -> List:
             is_finish_on_route = any(finish_bus_stop in part for part in parts)
             if not is_finish_on_route:
                 continue
+            
+            # Остановки одинаковые
+            if start_bus_stop == finish_bus_stop:
+                continue
 
-            priority = 4
-            analysis_part = None
+            # Поиск маршрута и его характеристик
+            route = route_search.find_all_distance_variants(start_bus_stop, finish_bus_stop)
+            if not route:
+                continue
 
-            if len(parts) == 2:
-                # Остановки отправления и прибытия находятся в разных частях
-                # (направлениях) маршрута
-                is_start_in_part1 = start_bus_stop in parts[0]
-                is_finish_in_part1 = finish_bus_stop in parts[0]
-                is_start_in_part2 = start_bus_stop in parts[1]
-                is_finish_in_part2 = finish_bus_stop in parts[1]
+            # print()
+            # print('---', bus, start_bus_stop, finish_bus_stop, "---")
+            # print(route)
+            # print()
 
-                if (is_start_in_part1 and is_finish_in_part2) or \
-                        (is_start_in_part2 and is_finish_in_part1):
-                    priority = 2
-                    analysis_part = parts[0] if is_start_in_part1 else parts[1]
-
-            for part in parts:
-                if start_bus_stop in part and finish_bus_stop in part:
-                    # Обе остановки в одной части
-                    priority = 3
-                    analysis_part = part
-                    try:
-                        # Расположение остановок в части правильное
-                        # в направлении движения от старт к финиш
-                        start_index = part.index(start_bus_stop)
-                        finish_index = part.index(finish_bus_stop)
-                        if start_index < finish_index:
-                            priority = 1
-                            break
-                    except ValueError:
-                        continue
-
-            if priority < 4 and analysis_part:
-                # Приоритеты высокие - формируем ответ
-                found_routes.append({
-                    "priority": priority,
-                    "bus": bus,
-                    "start": start_bus_stop,
-                    "finish": finish_bus_stop,
-                    "final_stop_start": analysis_part[0],
-                    "final_stop_finish": analysis_part[-1],
-                })
+            # Формируем марршут
+            found_routes.append({
+                "priority": priority,
+                "bus": bus,
+                "start": start_bus_stop,
+                "finish": finish_bus_stop,
+                "final_stop_start": analysis_part[0],
+                "final_stop_finish": analysis_part[-1],
+            })
 
     # Сохраняей вывод в файл
     with open('log.tmp', 'w', encoding='utf-8') as f:
