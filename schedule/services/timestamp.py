@@ -131,8 +131,6 @@ def route_analysis(start_stop_name: str, finish_stop_name: str) -> List:
     # Итерация, создание пар и анализ маршрутов.
     # Объект для фильтрации и накопления маршрутов
     filter_routes = Filter()
-
-    found_routes = []
     for bus, parts in bus_to_stops.items():
         # Перебираем автобусы и части маршрута (туда и обратно)
         # Создание объекта поиска маршрутов
@@ -161,14 +159,25 @@ def route_analysis(start_stop_name: str, finish_stop_name: str) -> List:
             # print()
 
             # Формируем марршут
-            found_routes.append({
+            part_num = route["direction"]  # Номер части маршрута с списке маршрутов
+            priority = route["priority"]  # Приоритет
+            score = route["score"]  # Баллы
+            make_route = {
                 "priority": priority,
                 "bus": bus,
                 "start": start_bus_stop,
                 "finish": finish_bus_stop,
-                "final_stop_start": analysis_part[0],
-                "final_stop_finish": analysis_part[-1],
-            })
+                "final_stop_start": parts[part_num - 1][0],
+                "final_stop_finish": parts[part_num - 1][1],
+                "score": score,
+                "part": part_num
+            }
+
+            # Отправляем маршрут на фильтрацию и запись
+            filter_routes.pair_filter(make_route)
+
+    # Получение готового списка маршрутов
+    found_routes = filter_routes.get_bus_list()
 
     # Сохраняей вывод в файл
     with open('log.tmp', 'w', encoding='utf-8') as f:
@@ -176,7 +185,6 @@ def route_analysis(start_stop_name: str, finish_stop_name: str) -> List:
             for k in item.items():
                 print(k, file=f)
             print(file=f)
-
 
     return found_routes
 
@@ -198,18 +206,9 @@ def answer_by_two_busstop(start_stop_name: str, finish_stop_name: str) -> Dict:
     found_routes = route_analysis(start_stop_name, finish_stop_name)
 
     # 5 --------------------------------
-    # Очищаем `found_routes`, оставляя только наивысший приоритет.
-    min_priority = min(route['priority'] for route in found_routes)
-
-    if min_priority == 4:
-        return {}  # Нет приоритетов выше 4 (1, 2, 3)
-
-    # Выбираем все маршруты с высшим (из имеющихся) приоритетом
-    filtered_routes = [route for route in found_routes if route['priority'] == min_priority]
-
     # Формируем ответ
     report = {}
-    for route in filtered_routes:
+    for route in found_routes:
         start_bus_stop = route['start']
         bus_info = {
             route['bus']: {
@@ -403,6 +402,9 @@ def preparing_bus_list(buses, name_start) -> str:
 
         # Добавляем номер автобуса и модификатор в ответ
         add_text = f"({add_text})" if add_text else ''
-        text += f'{bus_number} {add_text}\n'
+        text += f"Автобус №{bus_number} {add_text},\n"
+
+    if text[-2:] == ",\n":
+        text = text[0:-2]  # Удаляем запятую в конце
 
     return text

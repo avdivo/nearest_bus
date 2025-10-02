@@ -225,7 +225,7 @@ class ExeAddBusStop(Executor):
                       f'.\n\n🚌 Вам подходят автобусы:\n')
             select_buses = set()
             for bs_name, buses_list in bs_dict.items():
-                string += f'🚥 {bs_name}:\n' + ", ".join(buses_list) + "."
+                string += f'🚥 {bs_name}:\n' + ", ".join(buses_list) + "\n"
                 select_buses.update(buses_list)
 
             select_buses = list(select_buses)
@@ -405,7 +405,7 @@ class MyRouter(Executor):
                     text_list += f'⌚ {time_str}     '  # Надцать часов минут
 
                     # Подготовка списка автобусов
-                    text_list += "Автобус №" + preparing_bus_list(schedule[time], start)
+                    text_list += preparing_bus_list(schedule[time], start) + "\n"
                 if not text_list:
                     text_list = f'⚠️ Нет автобусов на период - *{count}*.'
 

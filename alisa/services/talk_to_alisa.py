@@ -64,8 +64,7 @@ def answer_to_alisa(request_body, user = None):
         if minutes < 60:
             minutes_word = 'минуту' if minutes % 10 == 1 and minutes % 100 != 11 else 'минуты' if 1 < minutes % 10 < 5 and (minutes % 100 < 10 or minutes % 100 >= 20) else 'минут'
             insert = f' (через {minutes} {minutes_word})'
-        word = 'автобус номер' if len(buses) == 1 else 'автобусы номер'
-        text = f'{time}{insert} - {word}: '  # Надцать часов минут
+        text = f'{time}{insert} - '  # Надцать часов минут
 
         # text = hh.mm (через n минут) - автобус номер (автобусы номер)
 
@@ -76,7 +75,6 @@ def answer_to_alisa(request_body, user = None):
         # для поиска следующего автобуса
         user.set_parameters(bus_datetime.isoformat(), 'datetime')
         user.set_parameters(time, 'time')
-
         return text
 
     def say_schedule(start, end):
@@ -109,7 +107,7 @@ def answer_to_alisa(request_body, user = None):
                 if limit == 0:
                     break
                 limit -= 1
-                text += say_one_bus(time, buses, start)
+                text += say_one_bus(time, buses, start) + "\n"
         else:
             text = f'Нет информации о расписании между остановками {start} и {end}. '
 

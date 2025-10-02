@@ -47,7 +47,6 @@ class Filter:
             if self.best_priority < priority:
                 # Сохраненные маршруты имеют больший приоритет они остаются
                 return False
-
             if self.best_priority > priority:
                 # Сохраненные маршруты имеют меньший приоритет, удаляем их
                 self.storage = {}
@@ -57,8 +56,8 @@ class Filter:
             saved_route = self.storage.setdefault(part, {})  # Получение или создание маршрута
             saved_score = saved_route.get("score", 10000)  # Получение сохраненных баллов
             if saved_score > score:
-                # Новый маршрут лучше сохраненного (по лаллам)
-                saved_route[part] = route  # Перезаписываем маршрут
+                # Новый маршрут лучше сохраненного (по баллам)
+                self.storage[part] = route  # Перезаписываем маршрут
                 return True
             
             # Маршрут равен по приоритету 
@@ -80,15 +79,16 @@ class Filter:
         с предварительной фильтрацией
         """
         # Находим лучший приоритет из всех автобусов
-        best_priority = min([bus.best_priority for bus in self.bus_storage])
+        best_priority = min([bus.best_priority for bus in self.bus_storage.values()])
 
         result = []  # Список выдачи
-        for bus in self.bus_storage:
+        for bus in self.bus_storage.values():
             # Перебор объектов автобусов
-            for _, route in bus.storage.items():
+            for route in bus.storage.values():
                 # Проходим по частям маршрутов
                 # и получаем маршруты
-                if route["priority"] <= best_priority:
+
+                if route["priority"] == best_priority:
                     # Добавляе маршрут в список выдачи
                     result.append(route)
         
