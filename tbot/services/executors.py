@@ -345,7 +345,7 @@ class MyRouter(Executor):
                     for routers, times in routers_times.items():
                         bus_content += "\n" + ', '.join([f"*{router.start.name} - {router.end.name}*" for router in routers[:-1]])
                         bus_content += "\n" + ', '.join([time.strftime("%H:%M") for time in times])
-
+                    print(bus_content)
                     buffer.add(bus_content)  # Накапливаем текст для вывода
                 # Вывод сообщения
                 for text in buffer.finalize():

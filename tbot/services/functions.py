@@ -64,7 +64,7 @@ class ChunkedTextBuilder:
         """
         if len(self._buffer) + len(text) >= self.limit:
             self._chunks.append(self._buffer)
-            self._buffer = ""
+            self._buffer = text
         else:
             self._buffer += text
 
