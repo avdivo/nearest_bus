@@ -153,11 +153,6 @@ def route_analysis(start_stop_name: str, finish_stop_name: str) -> List:
             if not route:
                 continue
 
-            # print()
-            # print('---', bus, start_bus_stop, finish_bus_stop, "---")
-            # print(route)
-            # print()
-
             # Формируем марршут
             part_num = route["direction"]  # Номер части маршрута с списке маршрутов
             priority = route["priority"]  # Приоритет
@@ -168,7 +163,7 @@ def route_analysis(start_stop_name: str, finish_stop_name: str) -> List:
                 "start": start_bus_stop,
                 "finish": finish_bus_stop,
                 "final_stop_start": parts[part_num - 1][0],
-                "final_stop_finish": parts[part_num - 1][1],
+                "final_stop_finish": parts[part_num - 1][-1],
                 "score": score,
                 "part": part_num
             }
