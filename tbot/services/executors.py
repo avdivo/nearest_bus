@@ -331,7 +331,7 @@ class MyRouter(Executor):
 
                 spece = None
                 # Формируем заголовок сообщения. Он будет отправлен в самом начале.
-                text = f"🚌 Все автобусы от {start} на период 24 часа ({self.key_name})"
+                text = f"*🚌 Все автобусы от {start} на период 24 часа ({self.key_name})*"
 
                 # Начинаем итерацию по расписанию автобусов.
                 for bus, routers_times in schedule.items():
@@ -343,7 +343,7 @@ class MyRouter(Executor):
                         bus_content += "\n\n"
 
                     # Добавляем номер автобуса.
-                    bus_content += "🚌 №" + format_bus_number(bus.number)  # Буквы в кавычках
+                    bus_content += f"*🚌 №{format_bus_number(bus.number)}*"  # Буквы в кавычках
                     # Добавляем информацию о маршрутах и времени.
                     for routers, times in routers_times.items():
                         bus_content += "\n" + ', '.join([f"*{router.start.name} - {router.end.name}*" for router in routers[:-1]])
