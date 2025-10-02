@@ -46,3 +46,40 @@ def main_menu():
     return (telebot.types.ReplyKeyboardMarkup(row_width=2).
             add(*[telebot.types.KeyboardButton(name) for name in args]))
 
+
+class ChunkedTextBuilder:
+    """
+    Формирование ответв Телеграмм, собирает из фрагментов
+    текста чанки лимитированной длины. Для вывода в чат 
+    без превышения лимита на одно сообщение.
+    """
+    def __init__(self, limit=4096):
+        self.limit = limit
+        self._buffer = ""
+        self._chunks = []
+
+    def add(self, text: str):
+        """
+        Добавляет текст к буферу, разбивая на чанки при необходимости.
+        """
+        if len(self._buffer) + len(text) >= self.limit:
+            self._chunks.append(self._buffer)
+            self._buffer = ""
+        else:
+            self._buffer += text
+
+    def finalize(self):
+        """
+        Завершает накопление и возвращает список всех чанков.
+        """
+        if self._buffer:
+            self._chunks.append(self._buffer)
+            self._buffer = ""
+        return self._chunks
+    
+    def reset(self):
+        """
+        Сбрасывает накопленные данные.
+        """
+        self._buffer = ""
+        self._chunks = []

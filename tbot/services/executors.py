@@ -15,10 +15,9 @@ from tbot.models import IdsForName
 from schedule.models import BusStop, Holiday, StopGroup
 from schedule.services.timestamp import route_analysis, time_generator, preparing_bus_list, answer_by_two_busstop
 from utils.sorted_buses import sorted_buses
-from tbot.services.functions import date_now
+from .functions import date_now, ChunkedTextBuilder
 from schedule.services.full_schedule import full_schedule
 from schedule.services.functions import format_bus_number
-
 
 logger = logging.getLogger('alisa')
 
@@ -257,6 +256,8 @@ class MyRouter(Executor):
 
     def execute(self):
         """Показывает короткое расписание автобусов на выбранной остановке."""
+        buffer = ChunkedTextBuilder()  # Накопитель ответа ТГ
+
         answer = None
         if self.__class__.__name__ == IdsForName.get_name_by_id(self.kb_id) or self.kb_id in self.kb_wait:
             # Запрос от постоянной клавиатуры или от дополнительной (под расписанием) -
@@ -325,13 +326,9 @@ class MyRouter(Executor):
                 mode = 'bus'  # По автобусам, для полного расписания
                 schedule = full_schedule(start, week.index(self.key_name) + 1)
 
-                # Устанавливаем максимальную длину сообщения для Telegram API.
-                # Это ограничение составляет 4096 символов.
-                TELEGRAM_LIMIT = 4096
-
                 spece = None
                 # Формируем заголовок сообщения. Он будет отправлен в самом начале.
-                text = f"*🚌 Все автобусы от {start} на период 24 часа ({self.key_name})*"
+                buffer.add(f"*🚌 Все автобусы от {start} на период 24 часа ({self.key_name})*")
 
                 # Начинаем итерацию по расписанию автобусов.
                 for bus, routers_times in schedule.items():
@@ -349,21 +346,9 @@ class MyRouter(Executor):
                         bus_content += "\n" + ', '.join([f"*{router.start.name} - {router.end.name}*" for router in routers[:-1]])
                         bus_content += "\n" + ', '.join([time.strftime("%H:%M") for time in times])
 
-                    # Проверяем, превысит ли общая длина сообщения лимит,
-                    # если мы добавим информацию о текущем автобусе.
-                    if len(text) + len(bus_content) > TELEGRAM_LIMIT:
-                        # Если лимит будет превышен, отправляем уже накопленный текст.
-                        self.bot.send_message(self.message.chat.id, text, parse_mode='Markdown')
-                        # Начинаем новое сообщение с информации о текущем автобусе.
-                        # .lstrip() удаляет возможные пробелы или переносы строк в начале.
-                        text = bus_content.lstrip()
-                    else:
-                        # Если лимит не превышен, просто добавляем информацию к текущему сообщению.
-                        text += bus_content
-
-                # После завершения цикла отправляем оставшийся текст,
-                # который еще не был отправлен.
-                if text:
+                    buffer.add(bus_content)  # Накапливаем текст для вывода
+                # Вывод сообщения
+                for text in buffer.finalize():
                     self.bot.send_message(self.message.chat.id, text, parse_mode='Markdown')
 
             # ----------------------------------------------------------
@@ -396,21 +381,24 @@ class MyRouter(Executor):
                 rout = ""
                 if  f"{start} - {finish}" != key_name:
                     rout = f'("{start}" ⟶ "{finish}")\n'
-                print(day, "--------------------------")
-                text = f'🔄  Маршрут "{key_name}"\n{rout}Автобусы на период {count} ({week[day-1]})\n\n'
-                text_list = ""
+                buffer.add(f'🔄  Маршрут "{key_name}"\n{rout}Автобусы на период {count} ({week[day-1]})\n\n')
                 for time in gen:
                     # Готовим словарь для вывода
+                    text = ""
                     time_str = time.strftime("%H:%M")  # Время отправления автобуса (str)
-                    text_list += f'⌚ {time_str}     '  # Надцать часов минут
+                    text += f'⌚ {time_str}     '  # Надцать часов минут
 
                     # Подготовка списка автобусов
-                    text_list += preparing_bus_list(schedule[time], start) + "\n"
+                    text += preparing_bus_list(schedule[time], start) + "\n"
+                    buffer.add(text)
+
+                text_list = buffer.finalize()
                 if not text_list:
                     text_list = f'⚠️ Нет автобусов на период - *{count}*.'
 
                 # Отправляем расписание
-                self.bot.send_message(self.message.chat.id, text + text_list, parse_mode='Markdown')
+                for text in text_list:
+                    self.bot.send_message(self.message.chat.id, text, parse_mode='Markdown')
 
             # Формируем клавиатуру для дополнительных действий
             self.kb_wait = [self.keyboard(f'📆 Полное расписание:', week, row=7)]
