@@ -1,14 +1,18 @@
 import re
 from time import sleep, time
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
+from import_schedule.import_schedule import (
+    calculate_md5_from_dict,
+    get_direction_and_bus_stop,
+    merge_json_files,
+    save_bus,
+)
 from import_schedule.logger_config import logger
-from import_schedule.import_schedule import (calculate_md5_from_dict,
-                                             get_direction_and_bus_stop,
-                                             save_bus, merge_json_files)
 
 # Если нужно создать сводный файл, но не парсить
 merge_json_files()
@@ -29,8 +33,7 @@ while True:
             import_number = "_all_"
             break
 
-
-        match = re.match(r'\d+', import_number)
+        match = re.match(r"\d+", import_number)
         if not match or int(match.group()) > 21:
             raise ValueError("Нет такого автобуса")
 
@@ -58,7 +61,7 @@ sleep(2)
 page_source = driver.page_source
 
 time_start = time()
-logger.warning(f"Начало получения расписания.")
+logger.warning("Начало получения расписания.")
 
 # Находим номера маршрутов (номера автобусов) и записываем их в список
 direction_len = len(driver.find_elements(By.XPATH, '//*[@id="routeList"]/li[*]/a'))
@@ -76,21 +79,29 @@ while direction_len - i:
     directions = driver.find_elements(By.XPATH, '//*[@id="routeList"]/li[*]/a')
 
     # Удаляем все непечатаемые символы (включая \n, \t, \xa0 и др.)
-    cleaned_text = re.sub(r'[\x00-\x1F\x7F-\xA0\u200B-\u200F\u2028-\u202F]', ' ', directions[i].text)
+    cleaned_text = re.sub(
+        r"[\x00-\x1F\x7F-\xA0\u200B-\u200F\u2028-\u202F]", " ", directions[i].text
+    )
     bus_number = cleaned_text.split()[0]
 
     # Автобусы городских маршрутов кончились
-    if bus_number == '201C' or bus_number == '201С':
+    if bus_number == "201C" or bus_number == "201С":
         elapsed_time = time() - time_start
         # Разбиваем на часы, минуты и секунды
         hours, remainder = divmod(elapsed_time, 3600)
         minutes, seconds = divmod(remainder, 60)
 
-        logger.warning(f"Конец получения расписания. {int(hours)} ч {int(minutes)} мин {int(seconds)} сек ")
-        # Это останавливает процесс, чтобы не сканировать пригородные маршруты
+        logger.warning(
+            (
+                f"Конец получения расписания. {int(hours)} ч {int(minutes)} мин "
+                f"{int(seconds)} сек "
+            )
+        )
+        # Это останавливает процесс, чтобы не
+        # сканировать пригородные маршруты
         break
 
-    print(cleaned_text, end='')
+    print(cleaned_text, end="")
 
     # Нужно ли получать расписание для этого автобуса
     if import_number != "_all_" and bus_number != import_number:
@@ -126,7 +137,7 @@ while direction_len - i:
         # После первого прочтения запоминаем hash и читаем еще раз
         hash = calculate_md5_from_dict(result)
         driver.get(url)
-        logger.info(f"Прочитано 1 раз")
+        logger.info("Прочитано 1 раз")
         continue
     else:
         # После 2 прочтения принимаем решение о перепрочтении еще 2 раз
@@ -136,16 +147,16 @@ while direction_len - i:
             hash = None
             i += 1
             driver.get(url)
-            logger.info(f"Правильность чтения подтверждена.")
-            logger.info(f"{message}")
+            logger.info("Правильность чтения подтверждена.")
+            logger.info("{message}")
             continue
         else:
             # Расписания полученные 2 раза оказались разными
             driver.get(url)
-            logger.warning(f"Ошибка чтения. Повтор...")
+            logger.warning("Ошибка чтения. Повтор...")
             hash = None
 
 
 # Собираем общее расписание
-logger.warning(f"Сборка полного расписания...")
+logger.warning("Сборка полного расписания...")
 merge_json_files()

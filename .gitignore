@@ -1,11 +1,23 @@
+# Environments
+.venv/
+venv/
 .env
 .env_server
-db.sqlite3
-db.zip
-db_old.zip
-db_test.sqlite3
-telebot.log
-venv
+
+# IDE settings
+.idea/
+.vscode/
+
+# Python cache
 __pycache__/
 *.pyc
-log.tmp
+
+# Databases
+db.sqlite3
+db_test.sqlite3
+db.zip
+db_old.zip
+
+# Logs and temporary files
+*.log
+*.tmp
